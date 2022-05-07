@@ -33,6 +33,7 @@ zeta-kotlin目前只提供了一个最基础的RBAC用户角色权限功能。�
 | --------------------- | ------------------------------------- | ------------------------------------------------------------ |
 | zeta-kotlin-generator | 专门为zeta-kotlin项目定做的代码生成器 | [gitee](https://gitee.com/xia5800/zeta-kotlin-generator)  [github](https://github.com/xia5800/zeta-kotlin-generator) |
 | zeta-kotlin-web       | zeta-kotlin项目的前端               | [gitee](https://gitee.com/xia5800/zeta-kotlin-web) |
+| zeta-kotlin           | zeta-kotlin项目的后端               | [gitee](https://gitee.com/xia5800/zeta-kotlin) |
 
 ## 待办
 - [ ] 代码生成器
