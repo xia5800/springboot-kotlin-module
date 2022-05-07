@@ -107,7 +107,7 @@ class MainController(
     fun logout(request: HttpServletRequest): ApiResult<Boolean> {
         val user = service.getById(StpUtil.getLoginIdAsLong())
         if(user != null) {
-            // 登录日志
+            // 登出日志
             applicationContext.publishEvent(SysLoginEvent(SysLoginLogDTO.loginFail(
                 user.account ?: "", LoginStateEnum.LOGOUT, request
             )))
