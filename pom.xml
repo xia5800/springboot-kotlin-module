@@ -14,7 +14,7 @@
 
     <groupId>com.zeta</groupId>
     <artifactId>zeta-kotlin-module</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.8</version>
     <name>${project.artifactId}</name>
     <description>
         zeta-kotlin-module项目是zeta-kotlin的多模块版。
@@ -35,6 +35,7 @@
         <java.version>1.8</java.version>
         <kotlin.version>1.6.21</kotlin.version>
         <spring-boot-maven-plugin.version>2.6.2</spring-boot-maven-plugin.version>
+        <versions-maven-plugin.version>2.7</versions-maven-plugin.version>
 
         <mybatis-plus.version>3.4.3.3</mybatis-plus.version>
         <druid.version>1.2.5</druid.version>
@@ -299,6 +300,15 @@
                             <nonFilteredFileExtension>woff</nonFilteredFileExtension>
                             <nonFilteredFileExtension>woff2</nonFilteredFileExtension>
                         </nonFilteredFileExtensions>
+                    </configuration>
+                </plugin>
+                <!-- 统一修改版本号插件 用法：mvn versions:set -DnewVersion=1.0.8 -DgenerateBackupPoms=false -->
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>versions-maven-plugin</artifactId>
+                    <version>${versions-maven-plugin.version}</version>
+                    <configuration>
+                        <generateBackupPoms>false</generateBackupPoms>
                     </configuration>
                 </plugin>
             </plugins>
