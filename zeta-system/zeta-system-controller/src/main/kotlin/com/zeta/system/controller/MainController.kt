@@ -14,8 +14,6 @@ import com.zeta.system.model.result.LoginUserDTO
 import com.zeta.system.service.ISysUserService
 import io.swagger.annotations.Api
 import io.swagger.annotations.ApiOperation
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.ApplicationContext
 import org.springframework.validation.annotation.Validated
@@ -41,7 +39,7 @@ import javax.servlet.http.HttpServletRequest
 class MainController(
     private val applicationContext: ApplicationContext,
     private val redisUtil: RedisUtil
-) : SuperSimpleController<ISysUserService, SysUser>() {
+): SuperSimpleController<ISysUserService, SysUser>() {
 
     @Value("\${spring.profiles.active:prod}")
     private val env: String? = null
@@ -67,6 +65,8 @@ class MainController(
 
         // 查询用户, 因为账号已经判空过了所以这里直接param.account!!
         val user = service.getByAccount(param.account!!) ?: return fail("用户不存在")
+        // 设置用户id，方便记录日志的时候设置创建人。ps，这里有点问题，得判断配置文件`zeta.database.userIdType`的值是啥。
+        ContextUtil.setUserId(user.id!!)
 
         // 判断密码
         if(!service.comparePassword(param.password!!, user.password!!)) {
@@ -79,7 +79,7 @@ class MainController(
         // 判断用户状态
         if(user.state == UserStateEnum.FORBIDDEN.code) {
             applicationContext.publishEvent(SysLoginEvent(SysLoginLogDTO.loginFail(
-                param.account!!, LoginStateEnum.FAIL, request
+                param.account!!, LoginStateEnum.FAIL, "用户被禁用，无法登录", request
             )))
             return fail("用户被禁用，无法登录")
         }
@@ -87,7 +87,6 @@ class MainController(
         // 踢人下线并登录
         StpUtil.kickout(user.id)
         StpUtil.login(user.id)
-        ContextUtil.setUserId(user.id!!)
 
         // 登录日志
         applicationContext.publishEvent(SysLoginEvent(SysLoginLogDTO.loginSuccess(param.account!!, request = request)))
