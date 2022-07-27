@@ -5,7 +5,7 @@
     <parent>
         <artifactId>zeta-common</artifactId>
         <groupId>com.zeta</groupId>
-        <version>1.0.8</version>
+        <version>1.0.9</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>

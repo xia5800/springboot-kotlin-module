@@ -14,7 +14,7 @@
 
     <groupId>com.zeta</groupId>
     <artifactId>zeta-kotlin-module</artifactId>
-    <version>1.0.8</version>
+    <version>1.0.9</version>
     <name>${project.artifactId}</name>
     <description>
         zeta-kotlin-module项目是zeta-kotlin的多模块版。
