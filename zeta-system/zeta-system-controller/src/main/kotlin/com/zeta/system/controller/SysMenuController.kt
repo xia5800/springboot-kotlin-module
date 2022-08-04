@@ -27,20 +27,20 @@ import org.zetaframework.core.utils.TreeUtil
 @PreAuth(replace = "sys:menu")
 @RestController
 @RequestMapping("/api/system/menu")
-class SysMenuController :
-    SuperController<ISysMenuService, Long, SysMenu, SysMenuQueryParam, SysMenuSaveDTO, SysMenuUpdateDTO>()
-{
+class SysMenuController: SuperController<ISysMenuService, Long, SysMenu, SysMenuQueryParam, SysMenuSaveDTO, SysMenuUpdateDTO>() {
 
     /**
      * 查询菜单树
+     *
+     * @param param SysMenuQueryParam
      * @return List<Menu>
      */
     @ApiOperationSupport(ignoreParameters = ["children"])
     @ApiOperation(value = "查询菜单树")
     @PostMapping("/tree")
-    fun tree(@RequestBody menu: SysMenuQueryParam): ApiResult<List<SysMenu?>> {
+    fun tree(@RequestBody param: SysMenuQueryParam): ApiResult<List<SysMenu?>> {
         // 查询所有菜单
-        val menuList = handlerBatchQuery(menu)
+        val menuList = handlerBatchQuery(param)
         if(menuList.isEmpty()) return fail("未查询到菜单")
 
         // 转换成树形结构
