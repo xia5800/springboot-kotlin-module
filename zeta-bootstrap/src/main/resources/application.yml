@@ -4,7 +4,7 @@ server:
 
 zeta:
   # 项目版本
-  version: 1.0.9
+  version: 1.1.0
   # 项目名
   name: zeta-kotlin
   # 操作日志配置
@@ -44,7 +44,7 @@ zeta:
     contact:
       # 联系人
       name: gcc
-    # 接口分组
+    # 接口分组 (对应knife4j文档界面左上角的下拉菜单，可以切换查看不同模块的接口文档)
     docket:
       system:
         title: default
