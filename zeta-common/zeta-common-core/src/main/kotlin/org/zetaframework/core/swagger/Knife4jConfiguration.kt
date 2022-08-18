@@ -1,6 +1,5 @@
 package org.zetaframework.core.swagger
 
-import cn.hutool.core.collection.CollUtil
 import com.github.xiaoymin.knife4j.spring.extension.OpenApiExtensionResolver
 import org.springframework.beans.factory.BeanFactory
 import org.springframework.beans.factory.BeanFactoryAware
