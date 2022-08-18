@@ -14,7 +14,7 @@
 
     <groupId>com.zeta</groupId>
     <artifactId>zeta-kotlin-module</artifactId>
-    <version>1.1.0</version>
+    <version>1.1.1</version>
     <name>${project.artifactId}</name>
     <description>
         zeta-kotlin-module项目是zeta-kotlin的多模块版。
@@ -32,7 +32,6 @@
     <properties>
         <zeta-kotlin.version>${project.version}</zeta-kotlin.version>
 
-        <!-- 下次更新，将升级spring boot版本到 2.7.x 届时java版本将改为11 -->
         <java.version>1.8</java.version>
         <kotlin.version>1.6.21</kotlin.version>
         <maven.compiler.source>8</maven.compiler.source>
