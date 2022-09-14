@@ -1,5 +1,6 @@
 package org.zetaframework.core.swagger
 
+import cn.hutool.core.util.StrUtil
 import com.github.xiaoymin.knife4j.spring.extension.OpenApiExtensionResolver
 import org.springframework.beans.factory.BeanFactory
 import org.springframework.beans.factory.BeanFactoryAware
@@ -8,8 +9,10 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Import
+import org.springframework.util.ClassUtils
 import org.zetaframework.core.swagger.properties.SwaggerProperties
 import springfox.bean.validators.configuration.BeanValidatorPluginsConfiguration
+import springfox.documentation.RequestHandler
 import springfox.documentation.builders.ApiInfoBuilder
 import springfox.documentation.builders.PathSelectors
 import springfox.documentation.builders.RequestHandlerSelectors
@@ -18,6 +21,8 @@ import springfox.documentation.service.Contact
 import springfox.documentation.spi.DocumentationType
 import springfox.documentation.spring.web.plugins.Docket
 import springfox.documentation.swagger2.annotations.EnableSwagger2WebMvc
+import java.util.*
+import java.util.function.Predicate
 
 /**
  * Knife4j 配置
@@ -29,10 +34,16 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2WebMvc
 @Import(BeanValidatorPluginsConfiguration::class)
 @EnableConfigurationProperties(SwaggerProperties::class)
 class Knife4jConfiguration(
-    private var factory: BeanFactory,
     private val swaggerProperties: SwaggerProperties,
     private val openApiExtensionResolver: OpenApiExtensionResolver
 ) : BeanFactoryAware {
+
+    companion object {
+        /** 分号 */
+        private const val SEMICOLON = ";"
+    }
+
+    private lateinit var factory: BeanFactory
 
     override fun setBeanFactory(beanFactory: BeanFactory) {
         factory = beanFactory
@@ -63,7 +74,7 @@ class Knife4jConfiguration(
         else {
             swaggerProperties.docket.forEach { (title, docketInfo) ->
                 // 有basePackage才注册Bean
-                if (docketInfo.basePackage != null) {
+                if (!docketInfo.basePackage.isNullOrBlank()) {
                     val docket = createDocket(docketInfo, swaggerProperties)
                     // 注册Bean
                     configurableBeanFactory.registerSingleton(title, docket)
@@ -93,8 +104,7 @@ class Knife4jConfiguration(
                 swaggerProperties.contact?.name,
                 swaggerProperties.contact?.url,
                 swaggerProperties.contact?.email,
-            )
-            )
+            ))
             .version(swaggerProperties.version)
             .build()
 
@@ -103,7 +113,7 @@ class Knife4jConfiguration(
             .apiInfo(apiInfo)
             .groupName(apiInfo.title)
             .select()
-            .apis(RequestHandlerSelectors.basePackage(docketInfo.basePackage))
+            .apis(handlerBasePackage(docketInfo.basePackage!!))
             .paths(PathSelectors.any())
             .build()
             // 赋予插件体系 主要是为了让 knife4j.setting配置生效
@@ -121,7 +131,7 @@ class Knife4jConfiguration(
             .apiInfo(apiInfo(swaggerProperties))
             .groupName(swaggerProperties.group)
             .select()
-            .apis(RequestHandlerSelectors.basePackage(swaggerProperties.basePackage))
+            .apis(handlerBasePackage(swaggerProperties.basePackage))
             .paths(PathSelectors.any())
             .build()
             // 赋予插件体系 主要是为了让 knife4j.setting配置生效
@@ -142,13 +152,33 @@ class Knife4jConfiguration(
             .licenseUrl(swaggerProperties.licenseUrl)
             .termsOfServiceUrl(swaggerProperties.termsOfServiceUrl)
             .contact(Contact(
-                    swaggerProperties.contact?.name,
-                    swaggerProperties.contact?.url,
-                    swaggerProperties.contact?.email,
-                )
-            )
+                swaggerProperties.contact?.name,
+                swaggerProperties.contact?.url,
+                swaggerProperties.contact?.email,
+            ))
             .version(swaggerProperties.version)
             .build()
+    }
+
+    /**
+     * Predicate that matches RequestHandler with given base package name for the class of the handler method.
+     * This predicate includes all request handlers matching the provided basePackage
+     *
+     * 说明：
+     * 1.替换原来的'RequestHandlerSelectors.basePackage()'方法。
+     * 2.支持base-package: com.xxx.xxx.xxxController;com.xxx.xxx.xxxController;com.xxx.xxx.xxxController 这种写法
+     *
+     * @param basePackage - base package of the classes
+     * @return this
+     */
+    private fun handlerBasePackage(basePackage: String): Predicate<RequestHandler> {
+        return Predicate { input: RequestHandler ->
+            Optional.ofNullable(input.declaringClass()).map { clazz: Class<*> ->
+                StrUtil.split(basePackage, SEMICOLON).any {
+                    ClassUtils.getPackageName(clazz).startsWith(it)
+                }
+            }.orElse(true)
+        }
     }
 
 }
