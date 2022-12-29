@@ -114,6 +114,22 @@
             <artifactId>knife4j-spring-boot-starter</artifactId>
         </dependency>
 
+        <!-- easypoi 基础注解包 -->
+        <dependency>
+            <groupId>cn.afterturn</groupId>
+            <artifactId>easypoi-annotation</artifactId>
+        </dependency>
+        <!-- easypoi springmvc整合包 -->
+        <dependency>
+            <groupId>cn.afterturn</groupId>
+            <artifactId>easypoi-web</artifactId>
+        </dependency>
+        <!-- easypoi 导入导出的工具包 -->
+        <dependency>
+            <groupId>cn.afterturn</groupId>
+            <artifactId>easypoi-base</artifactId>
+        </dependency>
+
         <!-- 其它 -->
         <dependency>
             <groupId>com.alibaba</groupId>
