@@ -19,14 +19,6 @@ zeta:
     contact:
       # 联系人
       name: gcc
-    # 接口分组(对应knife4j文档界面左上角的下拉菜单，可以切换查看不同模块的接口文档)
-    docket:
-      system:
-        title: default
-        basePackage: com.zeta.system
-      msg:
-        title: 消息管理
-        basePackage: com.zeta.msg
 
 # knife4j配置 https://doc.xiaominfo.com/knife4j/documentation/enhance.html
 knife4j:
@@ -52,17 +44,17 @@ knife4j:
     enableFooter: false
 ```
 
-更多详细配置，可以查看`org.zetaframework.core.swagger.properties.SwaggerProperties`类获得
+更多详细配置，可以从`org.zetaframework.core.properties.SwaggerProperties`类获得
 
 ## knife4j文档的用法
 
 可能有人没有接触过swagger或者没使用过knife4j的ui，特在此简单说明一下使用方法
 
 1. 获取验证码
-![获取验证码](./img/获取验证码.jpg)
+   ![获取验证码](./img/获取验证码.jpg)
 
 2. 登录
-![登录](./img/登录.jpg)
+   ![登录](./img/登录.jpg)
 
 3. 测试调用需要登录才能访问的接口
 

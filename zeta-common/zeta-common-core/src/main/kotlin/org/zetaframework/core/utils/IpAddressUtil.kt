@@ -1,8 +1,10 @@
 package org.zetaframework.core.utils
 
+import cn.hutool.core.io.FileUtil
 import cn.hutool.core.util.StrUtil
 import org.lionsoul.ip2region.xdb.Searcher
 import org.slf4j.LoggerFactory
+import java.io.File
 import java.util.regex.Pattern
 
 
@@ -22,7 +24,17 @@ object IpAddressUtil {
     private var vectorIndex: ByteArray? = null
 
     init {
-        val dbPath = IpAddressUtil::class.java.getResource("/ip2region.xdb")?.path
+        // fix: 解决打成jar包无法读取文件ip2region.xdb问题 --by gcc date:2023-08-14
+        val tmpDir = System.getProperty("user.dir") + File.separator + "temp"
+        val dbPath = tmpDir + File.separator + "ip2region.xdb"
+
+        val file = File(dbPath)
+        if (!file.exists()) {
+            logger.info("init ip region db path [{}]", dbPath)
+            val resourceAsStream = IpAddressUtil::class.java.getResourceAsStream("/ip2region.xdb")
+            FileUtil.writeFromStream(resourceAsStream, file)
+        }
+
         try {
             // 1.从 dbPath 中预先加载 VectorIndex 缓存，并且把这个得到的数据作为全局变量，后续反复使用
             vectorIndex = Searcher.loadVectorIndexFromFile(dbPath)
@@ -41,6 +53,7 @@ object IpAddressUtil {
      */
     fun search(ip: String): String {
         if (searcher == null) return StrUtil.EMPTY
+        if (ip == "0:0:0:0:0:0:0:1") return "0|0|0|内网IP|内网IP"
 
         return try {
             searcher!!.search(ip)

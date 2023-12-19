@@ -1,0 +1,63 @@
+package com.zeta.admin.controller.system
+
+import com.github.xiaoymin.knife4j.annotations.ApiOperationSupport
+import com.zeta.biz.system.service.ISysOptLogService
+import com.zeta.biz.system.service.ISysUserService
+import com.zeta.model.system.dto.sysOptLog.SysOptLogTableDTO
+import com.zeta.model.system.entity.SysOptLog
+import com.zeta.model.system.param.SysOptLogQueryParam
+import io.swagger.annotations.Api
+import io.swagger.annotations.ApiOperation
+import io.swagger.annotations.ApiParam
+import org.springframework.web.bind.annotation.*
+import org.zetaframework.annotation.satoken.PreAuth
+import org.zetaframework.annotation.satoken.PreCheckPermission
+import org.zetaframework.base.param.PageParam
+import org.zetaframework.base.result.ApiResult
+import org.zetaframework.base.result.PageResult
+import org.zetaframework.controller.SuperSimpleController
+
+/**
+ * 操作日志 前端控制器
+ *
+ * @author gcc
+ * @date 2022-03-18 15:27:15
+ */
+@Api(tags = ["操作日志"])
+@PreAuth(replace = "sys:optLog")
+@RestController
+@RequestMapping("/api/system/optLog")
+class SysOptLogController(private val userService: ISysUserService): SuperSimpleController<ISysOptLogService, SysOptLog>() {
+
+    /**
+     * 分页查询
+     * @param param PageParam<QueryParam> 分页查询参数
+     * @return ApiResult<PageResult<Entity>>
+     */
+    @PreCheckPermission(value = ["{}:view"])
+    @ApiOperationSupport(order = 10)
+    @ApiOperation(value = "分页查询")
+    @PostMapping("/page")
+    fun page(@RequestBody param: PageParam<SysOptLogQueryParam>): ApiResult<PageResult<SysOptLogTableDTO>> {
+        return success(service.pageTable(param))
+    }
+
+
+    /**
+     * 单体查询
+     * @param id 主键
+     * @return ApiResult<Entity?>
+     */
+    @PreCheckPermission(value = ["{}:view"])
+    @ApiOperationSupport(order = 20)
+    @ApiOperation(value = "单体查询", notes = "根据主键查询唯一数据，若查询不到则返回null")
+    @GetMapping("/{id}")
+    fun get(@PathVariable("id") @ApiParam("主键") id: Long): ApiResult<SysOptLog?> {
+        val entity = service.getById(id) ?: return success(null)
+
+        // 查询操作人
+        val user = userService.getById(entity.createdBy)
+        entity.userName = user?.username
+        return success(entity)
+    }
+}

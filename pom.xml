@@ -4,28 +4,27 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.6.7</version>
+        <version>2.7.13</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <packaging>pom</packaging>
 
-
     <groupId>com.zeta</groupId>
     <artifactId>zeta-kotlin-module</artifactId>
-    <version>1.1.5</version>
+    <version>2.0.0</version>
     <name>${project.artifactId}</name>
     <description>
         zeta-kotlin-module项目是zeta-kotlin的多模块版。
     </description>
 
-
     <modules>
-        <module>zeta-bootstrap</module>
         <module>zeta-common</module>
-        <module>zeta-system</module>
-        <module>zeta-msg</module>
+        <module>zeta-components</module>
+        <module>zeta-front</module>
+        <module>zeta-model</module>
+        <module>zeta-service</module>
     </modules>
 
 
@@ -33,24 +32,32 @@
         <zeta-kotlin.version>${project.version}</zeta-kotlin.version>
 
         <java.version>1.8</java.version>
-        <kotlin.version>1.6.21</kotlin.version>
+        <kotlin.version>1.9.10</kotlin.version>
+
         <maven.compiler.source>8</maven.compiler.source>
         <maven.compiler.target>8</maven.compiler.target>
-        <spring-boot-maven-plugin.version>2.6.7</spring-boot-maven-plugin.version>
-        <versions-maven-plugin.version>2.7</versions-maven-plugin.version>
+        <spring-boot-maven-plugin.version>2.7.13</spring-boot-maven-plugin.version>
+        <!-- maven打包跳过测试 -->
+        <skipTests>true</skipTests>
 
-        <mybatis-plus.version>3.5.2</mybatis-plus.version>
-        <druid.version>1.2.5</druid.version>
-        <sa-token.version>1.33.0</sa-token.version>
+        <mybatis.version>3.5.10</mybatis.version>
+        <mybatis-plus.version>3.5.3.2</mybatis-plus.version>
+        <druid.version>1.2.19</druid.version>
+        <sa-token.version>1.36.0</sa-token.version>
         <knife4j.version>2.0.9</knife4j.version>
-        <hutool.version>5.8.9</hutool.version>
+        <hutool.version>5.8.22</hutool.version>
         <easy-captcha.version>1.6.2</easy-captcha.version>
         <easypoi.version>4.4.0</easypoi.version>
-        <ip2region.version>2.6.6</ip2region.version>
-        <aliyun-oss.version>3.15.1</aliyun-oss.version>
-        <minio.version>8.4.3</minio.version>
-        <!-- 更改spring boot默认依赖的okhttp版本，使其和minio依赖的okhttp版本保持一致。这样才不会导致项目启动失败 -->
-        <okhttp3.version>4.8.1</okhttp3.version>
+        <ip2region.version>2.7.0</ip2region.version>
+        <aizuda-monitor.version>1.0.0</aizuda-monitor.version>
+
+        <!-- OSS相关 -->
+        <aliyun-oss.version>3.17.1</aliyun-oss.version>
+        <minio.version>8.5.5</minio.version>
+
+        <!-- 漏洞修复 -->
+        <snakeyaml.version>2.0</snakeyaml.version>
+        <undertow.verssion>3.1.4</undertow.verssion>
     </properties>
 
 
@@ -58,13 +65,121 @@
     <dependencyManagement>
         <dependencies>
             <!--
-             数据库 相关
-             -->
+            common 相关
+            -->
+            <dependency>
+                <groupId>com.zeta</groupId>
+                <artifactId>zeta-common-annotation</artifactId>
+                <version>${zeta-kotlin.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.zeta</groupId>
+                <artifactId>zeta-common-base</artifactId>
+                <version>${zeta-kotlin.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.zeta</groupId>
+                <artifactId>zeta-common-controller</artifactId>
+                <version>${zeta-kotlin.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.zeta</groupId>
+                <artifactId>zeta-common-core</artifactId>
+                <version>${zeta-kotlin.version}</version>
+            </dependency>
+            <!--
+            components 相关
+            -->
+            <dependency>
+                <groupId>com.zeta</groupId>
+                <artifactId>zeta-file-starter</artifactId>
+                <version>${zeta-kotlin.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.zeta</groupId>
+                <artifactId>zeta-log-starter</artifactId>
+                <version>${zeta-kotlin.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.zeta</groupId>
+                <artifactId>zeta-mybatisplus-starter</artifactId>
+                <version>${zeta-kotlin.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.zeta</groupId>
+                <artifactId>zeta-redis-starter</artifactId>
+                <version>${zeta-kotlin.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.zeta</groupId>
+                <artifactId>zeta-satoken-starter</artifactId>
+                <version>${zeta-kotlin.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.zeta</groupId>
+                <artifactId>zeta-swagger-starter</artifactId>
+                <version>${zeta-kotlin.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.zeta</groupId>
+                <artifactId>zeta-websocket-starter</artifactId>
+                <version>${zeta-kotlin.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.zeta</groupId>
+                <artifactId>zeta-quartz-starter</artifactId>
+                <version>${zeta-kotlin.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.zeta</groupId>
+                <artifactId>zeta-xss-starter</artifactId>
+                <version>${zeta-kotlin.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.zeta</groupId>
+                <artifactId>zeta-crypto-starter</artifactId>
+                <version>${zeta-kotlin.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.zeta</groupId>
+                <artifactId>zeta-sync-starter</artifactId>
+                <version>${zeta-kotlin.version}</version>
+            </dependency>
+
+            <!--
+            数据库 相关
+            -->
+            <!-- Mybatis。主要是MybatisPlus注解需要 -->
+            <dependency>
+                <groupId>org.mybatis</groupId>
+                <artifactId>mybatis</artifactId>
+                <version>${mybatis.version}</version>
+            </dependency>
+            <!-- MybatisPlus -->
             <dependency>
                 <groupId>com.baomidou</groupId>
                 <artifactId>mybatis-plus-boot-starter</artifactId>
                 <version>${mybatis-plus.version}</version>
             </dependency>
+            <!-- MybatisPlus注解 -->
+            <dependency>
+                <groupId>com.baomidou</groupId>
+                <artifactId>mybatis-plus-annotation</artifactId>
+                <version>${mybatis-plus.version}</version>
+            </dependency>
+            <!-- MybatisPlus核心 -->
+            <dependency>
+                <groupId>com.baomidou</groupId>
+                <artifactId>mybatis-plus-core</artifactId>
+                <version>${mybatis-plus.version}</version>
+            </dependency>
+            <!-- MybatisPlus扩展。 -->
+            <dependency>
+                <groupId>com.baomidou</groupId>
+                <artifactId>mybatis-plus-extension</artifactId>
+                <version>${mybatis-plus.version}</version>
+            </dependency>
+            <!-- 数据库连接池 -->
             <dependency>
                 <groupId>com.alibaba</groupId>
                 <artifactId>druid-spring-boot-starter</artifactId>
@@ -75,34 +190,35 @@
             <!--
              security 相关
              -->
+            <!-- sa-token-bom 说明：方便引入sa-token时对齐版本 文档地址： https://sa-token.cc/doc.html -->
             <dependency>
                 <groupId>cn.dev33</groupId>
-                <artifactId>sa-token-spring-boot-starter</artifactId>
+                <artifactId>sa-token-bom</artifactId>
                 <version>${sa-token.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>cn.dev33</groupId>
-                <artifactId>sa-token-spring-aop</artifactId>
-                <version>${sa-token.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>cn.dev33</groupId>
-                <artifactId>sa-token-dao-redis-jackson</artifactId>
-                <version>${sa-token.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>cn.dev33</groupId>
-                <artifactId>sa-token-jwt</artifactId>
-                <version>${sa-token.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
 
             <!--
              swagger 相关
              -->
+            <!-- knife4j -->
             <dependency>
                 <groupId>com.github.xiaoymin</groupId>
                 <artifactId>knife4j-spring-boot-starter</artifactId>
                 <version>${knife4j.version}</version>
+            </dependency>
+            <!-- knife4j注解 -->
+            <dependency>
+                <groupId>com.github.xiaoymin</groupId>
+                <artifactId>knife4j-annotations</artifactId>
+                <version>${knife4j.version}</version>
+            </dependency>
+            <!-- swagger注解 -->
+            <dependency>
+                <groupId>io.swagger</groupId>
+                <artifactId>swagger-annotations</artifactId>
+                <version>1.6.2</version>
             </dependency>
 
             <!--
@@ -164,11 +280,13 @@
             <!--
              utils 相关
              -->
-            <!-- hutool -->
+            <!-- hutool-bom -->
             <dependency>
                 <groupId>cn.hutool</groupId>
-                <artifactId>hutool-all</artifactId>
+                <artifactId>hutool-bom</artifactId>
                 <version>${hutool.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
             <!-- 图形验证码 -->
             <dependency>
@@ -183,13 +301,19 @@
             <dependency>
                 <groupId>com.alibaba</groupId>
                 <artifactId>transmittable-thread-local</artifactId>
-                <version>2.12.2</version>
+                <version>2.14.2</version>
             </dependency>
             <!-- 离线IP地址定位库 -->
             <dependency>
                 <groupId>org.lionsoul</groupId>
                 <artifactId>ip2region</artifactId>
                 <version>${ip2region.version}</version>
+            </dependency>
+            <!-- 获取系统信息 cpu、内存、jvm等。说明：用于前端展示服务器这些指标数据 -->
+            <dependency>
+                <groupId>com.aizuda</groupId>
+                <artifactId>aizuda-monitor</artifactId>
+                <version>${aizuda-monitor.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -198,8 +322,27 @@
     <!-- 全局依赖，每个子模块都有的依赖 -->
     <dependencies>
         <!--
-         spring boot 相关
+         kotlin 相关
          -->
+        <dependency>
+            <groupId>org.jetbrains.kotlin</groupId>
+            <artifactId>kotlin-reflect</artifactId>
+            <version>${kotlin.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jetbrains.kotlin</groupId>
+            <artifactId>kotlin-stdlib-jdk8</artifactId>
+            <version>${kotlin.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jetbrains.kotlin</groupId>
+            <artifactId>kotlin-stdlib</artifactId>
+            <version>${kotlin.version}</version>
+        </dependency>
+
+        <!--
+        test 相关
+        -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
@@ -207,26 +350,12 @@
         </dependency>
 
         <!--
-         kotlin 相关
-         -->
-        <dependency>
-            <groupId>org.jetbrains.kotlin</groupId>
-            <artifactId>kotlin-reflect</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.jetbrains.kotlin</groupId>
-            <artifactId>kotlin-stdlib-jdk8</artifactId>
-        </dependency>
-
-        <!--
          utils 相关
          -->
-        <!-- hutool -->
         <dependency>
             <groupId>cn.hutool</groupId>
-            <artifactId>hutool-all</artifactId>
+            <artifactId>hutool-core</artifactId>
         </dependency>
-
     </dependencies>
 
 
@@ -253,6 +382,13 @@
             <id>test</id>
             <properties>
                 <profile.active>test</profile.active>
+            </properties>
+        </profile>
+        <!-- docker环境-->
+        <profile>
+            <id>docker</id>
+            <properties>
+                <profile.active>docker</profile.active>
             </properties>
         </profile>
     </profiles>
@@ -305,6 +441,9 @@
                         </compilerPlugins>
                     </configuration>
                     <dependencies>
+                        <!--
+                        https://docs.spring.io/spring-framework/docs/current/reference/html/languages.html#final-by-default
+                        -->
                         <dependency>
                             <groupId>org.jetbrains.kotlin</groupId>
                             <artifactId>kotlin-maven-allopen</artifactId>
@@ -338,15 +477,6 @@
                             <nonFilteredFileExtension>woff2</nonFilteredFileExtension>
                             <nonFilteredFileExtension>xdb</nonFilteredFileExtension>
                         </nonFilteredFileExtensions>
-                    </configuration>
-                </plugin>
-                <!-- 统一修改版本号插件 用法：mvn versions:set -DnewVersion=1.0.8 -DgenerateBackupPoms=false -->
-                <plugin>
-                    <groupId>org.codehaus.mojo</groupId>
-                    <artifactId>versions-maven-plugin</artifactId>
-                    <version>${versions-maven-plugin.version}</version>
-                    <configuration>
-                        <generateBackupPoms>false</generateBackupPoms>
                     </configuration>
                 </plugin>
             </plugins>

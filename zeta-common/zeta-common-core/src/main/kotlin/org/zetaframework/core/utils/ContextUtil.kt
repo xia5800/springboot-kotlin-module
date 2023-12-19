@@ -163,4 +163,20 @@ object ContextUtil {
     fun getToken() = get("token")
     /*********************** 令牌 end ***********************/
 
+    /*********************** 语言 ***********************/
+    /**
+     * 设置lang
+     *
+     * @param token String
+     */
+    fun setLang(lang: String) = set("lang", lang)
+
+    /**
+     * 获取lang
+     *
+     * @return String
+     */
+    fun getLang() = get("lang")
+    /*********************** 语言 end ***********************/
+
 }

@@ -68,20 +68,20 @@ import com.zeta.common.cacheKey.CaptchaStringCacheKey
 @RestController
 @RequestMapping("/api/demo")
 class DemoController(private val captchaCacheKey: CaptchaStringCacheKey) {
-    
+
     @GetMapping
     fun example() {
         // 设置缓存
         captchaCacheKey.set("123", "验证码的值")
-        
+
         // 获取缓存值
         val cacheValue: String? = captchaCacheKey.get<String>("123")
         println(cacheValue)
-        
+
         // 删除缓存
         captchaCacheKey.delete("123")
     }
-    
+
 }
 ```
 
@@ -89,19 +89,19 @@ class DemoController(private val captchaCacheKey: CaptchaStringCacheKey) {
 ```
 /** 业务包 */
 // 验证码缓存key
-com.zeta.common.cacheKey.CaptchaStringCacheKey
+com.zeta.model.system.cacheKey.CaptchaStringCacheKey
 
 /** zetaframework包 */
 // 缓存key
-org.zetaframework.core.redis.model.CacheKey.kt
+org.zetaframework.redis.model.CacheKey.kt
 // Hash(Map)类型的缓存key
-org.zetaframework.core.redis.model.HashCacheKey
+org.zetaframework.redis.model.HashCacheKey
 // List类型的缓存key
-org.zetaframework.core.redis.model.ListCacheKey
+org.zetaframework.redis.model.ListCacheKey
 // Set类型的缓存key
-org.zetaframework.core.redis.model.SetCacheKey
+org.zetaframework.redis.model.SetCacheKey
 // String类型的缓存key
-org.zetaframework.core.redis.model.StringCacheKey
+org.zetaframework.redis.model.StringCacheKey
 // ZSet类型的缓存key
-org.zetaframework.core.redis.model.ZSetCacheKey
+org.zetaframework.redis.model.ZSetCacheKey
 ```

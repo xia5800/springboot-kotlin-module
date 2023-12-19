@@ -133,10 +133,10 @@ class SysUserController:
      */
     override fun handlerImport(list: MutableList<SysUserImportPoi>): ApiResult<Boolean> {
         // ImportBean -> SysUser
-        val batchList: List<SysUser> = list.map { 
+        val batchList: List<SysUser> = list.map {
             BeanUtil.toBean(it, SysUser::class.java)
         }
-        
+
         // 批量保存
         return success(service.saveBatch(batchList))
     }
@@ -144,6 +144,54 @@ class SysUserController:
 ```
 
 由上述代码可知，仅仅需要创建导入、导出类，手动实现数据导入功能即可实现Excel导入、导出功能。
+
+## 单独使用
+
+> 有时候，仅仅需要导出功能怎么办？
+
+基于以上情况，本人将`PoiController`拆分成了`ImportController`、`ExportController`和`PoiController`三个接口。
+
+如果只想要有导出功能, 实现`ExportController`接口，重写`findExportList`方法即可
+
+```kotlin
+// 省略无关注解
+class SysUserController:
+    SuperSimpleController<ISysUserService, SysUser>(),
+    // 实现ExportController接口
+    ExportController<SysUserExportPoi, SysUser, SysUserQueryParam>
+{
+
+    /**
+     * 获取待导出的数据 （对要导出的数据进行处理）
+     *
+     * @param param QueryParam
+     * @return MutableList<Entity>
+     */
+    override fun findExportList(param: SysUserQueryParam): MutableList<SysUserExportPoi> {
+        // 条件查询SysUser数据
+        val entity = BeanUtil.toBean(param, SysUser::class.java)
+        val list = getBaseService().list(QueryWrapper<SysUser>(entity))
+        if (list.isNullOrEmpty()) return mutableListOf()
+
+        // 批量获取用户角色 Map<用户id, 用户角色列表>
+        val userIds: List<Long> = list.map { it.id!! }
+        val userRoleMap: Map<Long, List<SysRoleDTO>> = service.getUserRoles(userIds)
+        list.forEach { user ->
+            user.roles = userRoleMap.getOrDefault(user.id, mutableListOf())
+        }
+
+        // 对要导出的数据进行处理  SysUser -> SysUserExportPoi
+        return list.map { user ->
+            val exportPoi = BeanUtil.toBean(user, SysUserExportPoi::class.java)
+            // 处理用户角色 ps:导出角色名还是导出角色编码看需求
+            exportPoi.roles = user.roles?.mapNotNull { it.name }
+            exportPoi
+        }.toMutableList()
+    }
+}
+```
+
+只想要导入接口，代码也同理。实现`ImportController`并重写对应的方法
 
 ## 高级功能
 
@@ -302,7 +350,7 @@ class SysUserController:
         importParams.verifyHandler = object: IExcelVerifyHandler<SysUserImportPoi> {
             override fun verifyHandler(obj: SysUserImportPoi): ExcelVerifyHandlerResult {
                 // 判断是否存在
-                return if(ExistParam<SysUser, Long>(SysUser::account, obj.account).isExist(service)) {
+                return if (ExistParam<SysUser, Long>(SysUser::account, obj.account).isExist(service)) {
                     ExcelVerifyHandlerResult(false, "账号已存在")
                 } else ExcelVerifyHandlerResult(true, "")
             }
@@ -310,7 +358,7 @@ class SysUserController:
     }
 
 }
-``` 
+```
 
 返回结果
 ```json
@@ -350,7 +398,7 @@ class SysUserExcelVerifyHandler(private val service: ISysUserService): IExcelVer
             flag = false
         } else {
             // 判断是否存在
-            if(ExistParam<SysUser, Long>(SysUser::account, obj.account).isExist(service)) {
+            if (ExistParam<SysUser, Long>(SysUser::account, obj.account).isExist(service)) {
                 message = "账号已存在"
                 flag = false
             }
@@ -358,7 +406,7 @@ class SysUserExcelVerifyHandler(private val service: ISysUserService): IExcelVer
 
         return ExcelVerifyHandlerResult(flag, message)
     }
-    
+
 }
 ```
 

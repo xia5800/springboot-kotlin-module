@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <groupId>com.zeta</groupId>
+        <artifactId>zeta-front</artifactId>
+        <version>2.0.0</version>
+    </parent>
+
+    <modelVersion>4.0.0</modelVersion>
+    <artifactId>zeta-admin-server</artifactId>
+    <name>${project.artifactId}</name>
+    <description>zeta-kotlin后端启动模块</description>
+    <packaging>jar</packaging>
+
+    <properties>
+        <maven.compiler.source>8</maven.compiler.source>
+        <maven.compiler.target>8</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+    <dependencies>
+        <!--
+        通用依赖(zeta-common里面的)
+        -->
+        <!-- zeta-controller -->
+        <dependency>
+            <groupId>com.zeta</groupId>
+            <artifactId>zeta-common-controller</artifactId>
+        </dependency>
+        <!-- zeta-common-core 排除tomcat依赖 -->
+        <dependency>
+            <groupId>com.zeta</groupId>
+            <artifactId>zeta-common-core</artifactId>
+            <exclusions>
+                <!-- 使用undertow容器要排除这个 -->
+                <exclusion>
+                    <groupId>org.apache.tomcat.embed</groupId>
+                    <artifactId>tomcat-embed-core</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <!--
+        组件模块(zeta-components里面的)
+        -->
+        <dependency>
+            <groupId>com.zeta</groupId>
+            <artifactId>zeta-satoken-starter</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.zeta</groupId>
+            <artifactId>zeta-mybatisplus-starter</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.zeta</groupId>
+            <artifactId>zeta-log-starter</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.zeta</groupId>
+            <artifactId>zeta-swagger-starter</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.zeta</groupId>
+            <artifactId>zeta-crypto-starter</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.zeta</groupId>
+            <artifactId>zeta-websocket-starter</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.zeta</groupId>
+            <artifactId>zeta-redis-starter</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.zeta</groupId>
+            <artifactId>zeta-xss-starter</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.zeta</groupId>
+            <artifactId>zeta-sync-starter</artifactId>
+        </dependency>
+
+
+        <!--
+        业务依赖(zeta-xxxx各个jar包的)
+        -->
+        <!-- zeta-biz-system -->
+        <dependency>
+            <groupId>com.zeta</groupId>
+            <artifactId>zeta-biz-system</artifactId>
+            <version>${zeta-kotlin.version}</version>
+        </dependency>
+
+
+        <!--
+        其它依赖（spring boot、其它第三方jar等）
+        -->
+        <!-- spring web -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-starter-tomcat</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-undertow</artifactId>
+        </dependency>
+        <!-- 图形验证码 -->
+        <dependency>
+            <groupId>com.github.whvcse</groupId>
+            <artifactId>easy-captcha</artifactId>
+        </dependency>
+        <!-- 获取系统信息 cpu、内存、jvm等。说明：用于前端展示服务器这些指标数据 -->
+        <dependency>
+            <groupId>com.aizuda</groupId>
+            <artifactId>aizuda-monitor</artifactId>
+        </dependency>
+
+    </dependencies>
+
+    <build>
+        <!-- jar包的名字 -->
+        <finalName>zeta-admin-server</finalName>
+
+        <!-- 源码地址：默认src/main/java -->
+        <sourceDirectory>${project.basedir}/src/main/kotlin</sourceDirectory>
+        <testSourceDirectory>${project.basedir}/src/test/kotlin</testSourceDirectory>
+
+        <plugins>
+            <!--
+             spring boot 打包插件
+             说明： 只在启动类所在的模块引用
+             -->
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+
+            <!--
+            kotlin打包插件
+            说明：
+            1.【重要】每个模块都要配置
+            2.主要用到了其中的allopen插件（不然代码里面到处都是open class等写法）
+            3.在项目根目录的pom.xml里已经配置好了，当然也可以在这里重新配置一下
+            -->
+            <plugin>
+                <groupId>org.jetbrains.kotlin</groupId>
+                <artifactId>kotlin-maven-plugin</artifactId>
+            </plugin>
+
+            <!-- resources资源插件 ps:在项目根目录的pom.xml里已经配置好了 -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

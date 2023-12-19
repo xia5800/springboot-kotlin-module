@@ -39,6 +39,8 @@ object JSONUtil{
         objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
         // 禁止:FAIL_ON_EMPTY_BEANS
         objectMapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
+        // 允许：枚举使用toString方式
+        objectMapper.enable(SerializationFeature.WRITE_ENUMS_USING_TO_STRING)
 
         // 自定义扩展
         val javaTimeModule = JavaTimeModule()
@@ -66,11 +68,11 @@ object JSONUtil{
      * @return String           json字符串
      */
     fun toJsonStr(value: Any?, pretty: Boolean? = false): String? {
-        if(value == null) {
+        if (value == null) {
             return null
         }
         // 如果对象是字符串，直接返回
-        if(value is String) {
+        if (value is String) {
             return value
         }
 
@@ -96,7 +98,7 @@ object JSONUtil{
      * @return T?
      */
     fun <T> parseObject(json: String?, clazz: Class<T>): T? {
-        if(StrUtil.isBlank(json)) {
+        if (StrUtil.isBlank(json)) {
             return null
         }
 

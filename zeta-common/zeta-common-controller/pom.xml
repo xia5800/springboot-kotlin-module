@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <groupId>com.zeta</groupId>
+        <artifactId>zeta-common</artifactId>
+        <version>2.0.0</version>
+    </parent>
+
+    <modelVersion>4.0.0</modelVersion>
+    <artifactId>zeta-common-controller</artifactId>
+    <name>${project.artifactId}</name>
+    <description>通用Controller模块</description>
+    <packaging>jar</packaging>
+
+    <properties>
+        <maven.compiler.source>8</maven.compiler.source>
+        <maven.compiler.target>8</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+    <dependencies>
+        <!--
+        通用依赖(zeta-common里面的)
+        -->
+        <dependency>
+            <groupId>com.zeta</groupId>
+            <artifactId>zeta-common-base</artifactId>
+        </dependency>
+
+
+        <!--
+        其它依赖（spring boot、其它第三方jar等）
+        -->
+        <!-- tomcat依赖。 主要使用HttpServletRequest、HttpServletResponse -->
+        <dependency>
+            <groupId>org.apache.tomcat.embed</groupId>
+            <artifactId>tomcat-embed-core</artifactId>
+            <optional>true</optional> <!-- 不向上传递依赖 -->
+        </dependency>
+        <!-- easypoi springmvc整合包 -->
+        <dependency>
+            <groupId>cn.afterturn</groupId>
+            <artifactId>easypoi-web</artifactId>
+            <optional>true</optional> <!-- 不向上传递依赖 -->
+        </dependency>
+
+
+    </dependencies>
+
+    <build>
+        <!-- 源码地址：默认src/main/java -->
+        <sourceDirectory>${project.basedir}/src/main/kotlin</sourceDirectory>
+        <testSourceDirectory>${project.basedir}/src/test/kotlin</testSourceDirectory>
+
+        <plugins>
+            <!--
+            kotlin打包插件
+            说明：
+            1.【重要】每个模块都要配置
+            2.主要用到了其中的allopen插件（不然代码里面到处都是open class等写法）
+            3.在项目根目录的pom.xml里已经配置好了，当然也可以在这里重新配置一下
+            -->
+            <plugin>
+                <groupId>org.jetbrains.kotlin</groupId>
+                <artifactId>kotlin-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

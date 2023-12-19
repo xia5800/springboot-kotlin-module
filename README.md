@@ -3,36 +3,42 @@
 ## 简介
 zeta-kotlin-module是[zeta-kotlin](https://gitee.com/xia5800/zeta-kotlin)项目的多模块版本。
 
-zeta-kotlin目前只提供了一个最基础的RBAC用户角色权限功能。不像其它开源项目那样大而全，zeta-kotlin项目相当精简。
-
 ## 项目结构
 
-| 模块                         | 说明                                                                    |
-| -------------------------- | ---------------------------------------------------------------------- |
-| zeta-bootstrap             | 项目启动模块，main方法、配置文件在这里                                              |
-| zeta-common         | zeta框架核心配置模块，包含sa-token、redis、mybatis-plus、knife4j等框架的配置   |
-| zeta-msg         | 消息管理 业务模块  |
-| zeta-system         | 系统管理 业务模块   |
+| 模块              | 说明                                                        |
+|-----------------|-----------------------------------------------------------|
+| zeta-front      | zeta框架前端模块。存放前端项目启动类、Controller、配置文件等                     |
+| zeta-common     | zeta框架通用模块模块，包含BaseController、BaseResult、BaseException等文件 |
+| zeta-components | zeta框架组件模块，包含sa-token、redis、mybatis-plus、knife4j等框架的配置    |
+| zeta-model      | zeta框架实体类模块，存放实体类、Dto、枚举等文件                               |
+| zeta-service    | zeta框架业务模块。存放Service、Dao、xml等文件                           |
 
 
 ## 技术选型
 
-| 技术                       | 名称                                                         |
-| -------------------------- | ------------------------------------------------------------ |
-| spring boot                | 核心框架                                                     |
-| sa-token                   | 权限认证框架                                                     |
-| mybatis-plus               | [MyBatis扩展](https://doc.xiaominfo.com/)                      |
-| Redis                      | 分布式缓存数据库                                             |
-| knife4j                    | [一个增强版本的Swagger 前端UI](https://doc.xiaominfo.com/knife4j/)  |
-| hutool                     | [Java工具类大全](https://hutool.cn/docs/#/)                  |
-| RedisUtil                  | [最全的Java操作Redis的工具类](https://gitee.com/whvse/RedisUtil) |
+| 技术           | 说明                                                        |
+|--------------|-----------------------------------------------------------|
+| spring boot  | 核心框架                                                      |
+| sa-token     | 权限认证框架                                                    |
+| mybatis-plus | [MyBatis扩展](https://doc.xiaominfo.com/)                   |
+| Redis        | 分布式缓存数据库                                                  |
+| knife4j      | [一个增强版本的Swagger 前端UI](https://doc.xiaominfo.com/knife4j/) |
+| hutool       | [Java工具类大全](https://hutool.cn/docs/#/)                    |
+| RedisUtil    | [最全的Java操作Redis的工具类](https://gitee.com/whvse/RedisUtil)   |
+| EasyPoi      | [简单方便的导入导出Excel](https://gitee.com/lemur/easypoi)         |
 
 ## 配套项目
 
-| 名称                  | 说明                                  | 项目地址                                                     |
-| --------------------- | ------------------------------------- | ------------------------------------------------------------ |
-| zeta-kotlin-generator | 专门为zeta-kotlin项目定做的代码生成器 | [gitee](https://gitee.com/xia5800/zeta-kotlin-generator)  [github](https://github.com/xia5800/zeta-kotlin-generator) |
-| zeta-kotlin-module    | zeta-kotlin项目多模块版              | [gitee](https://gitee.com/xia5800/zeta-kotlin-module) [github](https://github.com/xia5800/springboot-kotlin-module)|
+| 名称             | 说明                              | 项目地址                                                                                                   |
+|----------------|---------------------------------|--------------------------------------------------------------------------------------------------------|
+| zeta-web-layui | 本项目前端，使用vue3、vite5、typescript开发 | [gitee](https://gitee.com/xia5800/zeta-web-layui)  [github](https://github.com/xia5800/zeta-web-layui) |
+
+## 后端访问地址
+[http://localhost:8080/doc.html](http://localhost:8080/doc.html)
+
+账号：zetaAdmin
+
+密码：dDEWFk6fJKwZ55cL3zVUsQ==
 
 ## 已有功能
 
@@ -45,11 +51,9 @@ zeta-kotlin目前只提供了一个最基础的RBAC用户角色权限功能。�
 - websocket
 - XSS防护
 - Ip2region离线IP地址查询
-
-
-## 前端(无)
-
-[~~zeta-kotlin-web~~](https://gitee.com/xia5800/zeta-kotlin-web) (写的太辣鸡了，不好意思放出来)
+- Excel导入导出
+- 数据脱敏
+- 定时任务（基于quartz)
 
 
 ## 写在后面
@@ -71,5 +75,5 @@ zeta-kotlin目前只提供了一个最基础的RBAC用户角色权限功能。�
 - sa-token [https://sa-token.dev33.cn/](https://sa-token.dev33.cn/)
 - mybatis-plus：[https://baomidou.com/](https://baomidou.com/)
 - knife4j：[https://doc.xiaominfo.com/](https://doc.xiaominfo.com/)
-- hutool：[https://hutool.cn/](https://hutool.cn/)
-- Soybean Admin：[https://github.com/honghuangdc/soybean-admin](https://github.com/honghuangdc/soybean-admin)
+- Hutool：[https://hutool.cn/](https://hutool.cn/)
+- EasyPoi：[http://www.wupaas.com/](http://doc.wupaas.com/docs/easypoi)

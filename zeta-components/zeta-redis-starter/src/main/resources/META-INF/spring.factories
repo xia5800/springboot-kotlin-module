@@ -1,0 +1,3 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+  org.zetaframework.redis.RedisConfiguration,\
+  org.zetaframework.redis.JacksonConfiguration

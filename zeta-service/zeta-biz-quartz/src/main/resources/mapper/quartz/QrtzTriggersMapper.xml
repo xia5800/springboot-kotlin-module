@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zeta.biz.quartz.dao.QrtzTriggersMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.zeta.model.quartz.entity.QrtzTriggers">
+        <id column="SCHED_NAME" jdbcType="VARCHAR" property="schedName" />
+        <id column="TRIGGER_NAME" jdbcType="VARCHAR" property="triggerName" />
+        <id column="TRIGGER_GROUP" jdbcType="VARCHAR" property="triggerGroup" />
+        <result column="JOB_NAME" jdbcType="VARCHAR" property="jobName" />
+        <result column="JOB_GROUP" jdbcType="VARCHAR" property="jobGroup" />
+        <result column="DESCRIPTION" jdbcType="VARCHAR" property="description" />
+        <result column="NEXT_FIRE_TIME" jdbcType="BIGINT" property="nextFireTime" />
+        <result column="PREV_FIRE_TIME" jdbcType="BIGINT" property="prevFireTime" />
+        <result column="PRIORITY" jdbcType="INTEGER" property="priority" />
+        <result column="TRIGGER_STATE" jdbcType="VARCHAR" property="triggerState" />
+        <result column="TRIGGER_TYPE" jdbcType="VARCHAR" property="triggerType" />
+        <result column="START_TIME" jdbcType="BIGINT" property="startTime" />
+        <result column="END_TIME" jdbcType="BIGINT" property="endTime" />
+        <result column="CALENDAR_NAME" jdbcType="VARCHAR" property="calendarName" />
+        <result column="MISFIRE_INSTR" jdbcType="SMALLINT" property="misfireInstr" />
+    </resultMap>
+
+    <!-- 表名 -->
+    <sql id="TABLE_NAME">
+        QRTZ_TRIGGERS
+    </sql>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        SCHED_NAME, TRIGGER_NAME, TRIGGER_GROUP, JOB_NAME, JOB_GROUP, DESCRIPTION, NEXT_FIRE_TIME, PREV_FIRE_TIME, PRIORITY, TRIGGER_STATE, TRIGGER_TYPE, START_TIME, END_TIME, CALENDAR_NAME, MISFIRE_INSTR
+    </sql>
+
+    <!-- 用法：<include refid="QRTZ_TRIGGERS_JOIN_COLUMN_LIST"><property name="tableName" value="t1"/></include>, -->
+    <!-- 关联查询字段列 -->
+    <sql id="QRTZ_TRIGGERS_JOIN_COLUMN_LIST">
+        ${tableName}.SCHED_NAME, ${tableName}.TRIGGER_NAME, ${tableName}.TRIGGER_GROUP, ${tableName}.JOB_NAME, ${tableName}.JOB_GROUP, ${tableName}.DESCRIPTION,
+        ${tableName}.NEXT_FIRE_TIME, ${tableName}.PREV_FIRE_TIME, ${tableName}.PRIORITY, ${tableName}.TRIGGER_STATE, ${tableName}.TRIGGER_TYPE,
+        ${tableName}.START_TIME, ${tableName}.END_TIME, ${tableName}.CALENDAR_NAME, ${tableName}.MISFIRE_INSTR
+    </sql>
+
+    <!-- 通用查询条件 -->
+    <sql id="Base_Where">
+        <where>
+            <if test="param.schedName != null and param.schedName != ''">
+                AND SCHED_NAME LIKE CONCAT('%', #{param.schedName}, '%')
+            </if>
+            <if test="param.triggerName != null and param.triggerName != ''">
+                AND TRIGGER_NAME LIKE CONCAT('%', #{param.triggerName}, '%')
+            </if>
+            <if test="param.triggerGroup != null and param.triggerGroup != ''">
+                AND TRIGGER_GROUP LIKE CONCAT('%', #{param.triggerGroup}, '%')
+            </if>
+            <if test="param.jobName != null and param.jobName != ''">
+                AND JOB_NAME LIKE CONCAT('%', #{param.jobName}, '%')
+            </if>
+            <if test="param.jobGroup != null and param.jobGroup != ''">
+                AND JOB_GROUP LIKE CONCAT('%', #{param.jobGroup}, '%')
+            </if>
+            <if test="param.description != null and param.description != ''">
+                AND DESCRIPTION LIKE CONCAT('%', #{param.description}, '%')
+            </if>
+            <if test="param.nextFireTime != null and param.nextFireTime != ''">
+                AND NEXT_FIRE_TIME = #{param.nextFireTime}
+            </if>
+            <if test="param.prevFireTime != null and param.prevFireTime != ''">
+                AND PREV_FIRE_TIME = #{param.prevFireTime}
+            </if>
+            <if test="param.priority != null and param.priority != ''">
+                AND PRIORITY = #{param.priority}
+            </if>
+            <if test="param.triggerState != null and param.triggerState != ''">
+                AND TRIGGER_STATE LIKE CONCAT('%', #{param.triggerState}, '%')
+            </if>
+            <if test="param.triggerType != null and param.triggerType != ''">
+                AND TRIGGER_TYPE LIKE CONCAT('%', #{param.triggerType}, '%')
+            </if>
+            <if test="param.startTime != null and param.startTime != ''">
+                AND START_TIME = #{param.startTime}
+            </if>
+            <if test="param.endTime != null and param.endTime != ''">
+                AND END_TIME = #{param.endTime}
+            </if>
+            <if test="param.calendarName != null and param.calendarName != ''">
+                AND CALENDAR_NAME LIKE CONCAT('%', #{param.calendarName}, '%')
+            </if>
+            <if test="param.misfireInstr != null and param.misfireInstr != ''">
+                AND MISFIRE_INSTR = #{param.misfireInstr}
+            </if>
+        </where>
+    </sql>
+
+    <!-- 自定义分页查询 -->
+    <select id="customPage" resultType="org.zetaframework.quartz.module.QuartzJobDetailDTO">
+        SELECT
+            t1.TRIGGER_NAME,
+            t1.TRIGGER_GROUP AS triggerGroupName,
+            t1.DESCRIPTION AS triggerDescription,
+            FROM_UNIXTIME( t1.NEXT_FIRE_TIME/1000 ,'%Y-%m-%d %H:%i:%s') AS nextFireTime,
+            FROM_UNIXTIME( t1.PREV_FIRE_TIME/1000 ,'%Y-%m-%d %H:%i:%s') AS prevFireTime,
+            t1.PRIORITY,
+            FROM_UNIXTIME( t1.START_TIME/1000 ,'%Y-%m-%d %H:%i:%s') AS startTime,
+            FROM_UNIXTIME( t1.END_TIME/1000 ,'%Y-%m-%d %H:%i:%s') AS endTime,
+            t1.TRIGGER_STATE,
+            t1.TRIGGER_TYPE,
+            t2.JOB_NAME,
+            t2.JOB_GROUP AS jobGroupName,
+            t2.DESCRIPTION AS jobDescription,
+            t2.JOB_CLASS_NAME,
+            t3.CRON_EXPRESSION AS cron
+        FROM
+            QRTZ_TRIGGERS t1
+        LEFT JOIN QRTZ_JOB_DETAILS t2 ON t1.JOB_NAME = t2.JOB_NAME
+            AND t1.JOB_GROUP = t2.JOB_GROUP
+        LEFT JOIN QRTZ_CRON_TRIGGERS t3 ON t1.TRIGGER_NAME = t3.TRIGGER_NAME
+            AND t1.TRIGGER_GROUP = t3.TRIGGER_GROUP
+        <where>
+            <if test="param.jobName != null">
+                AND t1.JOB_NAME LIKE CONCAT('%', #{param.jobName}, '%')
+            </if>
+            <if test="param.triggerState != null">
+                AND t1.TRIGGER_STATE = #{param.triggerState}
+            </if>
+            <if test="param.description != null">
+                AND t1.DESCRIPTION LIKE CONCAT('%', #{param.description}, '%')
+            </if>
+            <if test="param.jobClassName != null">
+                AND t2.JOB_CLASS_NAME = ${param.jobClassName}
+            </if>
+        </where>
+    </select>
+
+</mapper>
