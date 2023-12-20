@@ -1,0 +1,62 @@
+package ${package.Controller};
+
+<% if(restControllerStyle){ %>
+import org.springframework.web.bind.annotation.*;
+<% }else{ %>
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.*;
+<% } %>
+<% /** 导入service、entity、param、dto */ %>
+import ${package.Service}.${table.serviceName};
+import ${package.Entity}.${entity};
+import ${customPackage.dtoPackagePath}.${customPackage.entitySaveDTO};
+import ${customPackage.dtoPackagePath}.${customPackage.entityUpdateDTO};
+import ${customPackage.paramBasePackagePath}.${customPackage.entityQueryParam};
+import org.zetaframework.annotation.satoken.PreAuth;
+import org.zetaframework.controller.SuperController;
+<% if(swagger) { %>
+    <% if(isSpringFox) { %>
+import io.swagger.annotations.*;
+    <% }else{ %>
+import io.swagger.v3.oas.annotations.tags.Tag;
+    <% } %>
+<% } %>
+<%
+/* 获取主键字段的类型 */
+var IdType = "";
+for(field in table.commonFields){
+    if(field.keyFlag) {
+        if(field.propertyType == "Integer") {
+            IdType = "Integer";
+        } else {
+            IdType = field.propertyType;
+        }
+        break;
+    }
+}
+%>
+
+/**
+ * ${table.comment!} 前端控制器
+ *
+ * @author ${author}
+ * @date ${date}
+ */
+<% if(swagger) { %>
+    <% if(isSpringFox) { %>
+@Api(tags = "${table.comment!}")
+    <% }else{ %>
+@Tag(name = "${table.comment!}", description = "${table.comment!}")
+    <% } %>
+<% } %>
+@PreAuth(replace = "${authorityCode}")
+<% if(restControllerStyle){ %>
+@RestController
+<% }else{ %>
+@Controller
+<% } %>
+@RequestMapping("/api<% if(isNotEmpty(package.ModuleName)){ %>/${package.ModuleName}<% } %>/<% if(controllerMappingHyphenStyle){ %>${controllerMappingHyphen}<% }else{ %>${table.entityPath}<% } %>")
+public class ${table.controllerName} extends SuperController<${table.serviceName}, ${IdType}, ${entity}, ${customPackage.entityQueryParam}, ${customPackage.entitySaveDTO}, ${customPackage.entityUpdateDTO}> {
+
+}
+

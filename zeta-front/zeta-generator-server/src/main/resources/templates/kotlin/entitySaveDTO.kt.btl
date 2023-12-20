@@ -1,0 +1,132 @@
+package ${customPackage.dtoPackagePath}
+
+<% if(swagger){ %>
+    <% if(isSpringFox) { %>
+import io.swagger.annotations.ApiModel
+import io.swagger.annotations.ApiModelProperty
+    <% }else{ %>
+import io.swagger.v3.oas.annotations.media.Schema
+    <% } %>
+<% } %>
+import ${timePackage}
+<% if(!isEmpty(bigDecimalPackage)) { %>
+import ${bigDecimalPackage}
+<% } %>
+<% if(isJakarta){ %>
+import jakarta.validation.constraints.*
+<% }else{ %>
+import javax.validation.constraints.*
+<% } %>
+
+/**
+ * 新增 ${table.comment!}
+ *
+ * @author ${author}
+ * @date ${date}
+ */
+<% if(swagger) { %>
+    <% if(isSpringFox) { %>
+@ApiModel(description = "新增${table.comment!''}")
+    <% }else{ %>
+@Schema(description = "新增${table.comment!''}")
+    <% } %>
+<% } %>
+data class ${customPackage.entitySaveDTO}(
+<%/**
+
+父类特有字段
+例如：
+TreeEntity的特有字段label、parentId、sortValue
+StateEntity的特有字段state
+
+说明：
+因为mybatis plus生成器生成的表信息中。父类所有的字段都存放在commonFields中，意味着id、create_time等字段也在里面。
+而TreeEntity的子类，新增的时候不需要传入id，只需要传入“特有字段”和“普通字段”。
+于是生成代码的时候，对特有字段进行了处理。在模板里面只要遍历“uniqueColumns”即可
+
+*/%>
+<% for(field in uniqueColumns){ %>
+
+    <%
+        /*非逻辑删除字段、非填充字段才显示*/
+        // @ApiModelProperty去除换行
+        var modelProperty = field.comment;
+        if(strutil.index(modelProperty, "\n") != -1) {
+            modelProperty = reg.replace(modelProperty, "\\n", "");
+        }
+        var fieldComment = strutil.split(field.comment, " ")[0];
+    %>
+    <% if(!field.logicDeleteField && isEmpty(field.fill)){ %>
+        <% if(isNotEmpty(field.comment)){ %>
+    /** ${modelProperty} */
+            <% /* 加swagger注解 */ %>
+            <% if(swagger){ %>
+                <% if(isSpringFox) { %>
+    @ApiModelProperty(value = "${modelProperty}", required = <% print(!field.metaInfo.nullable); %>)
+                <% }else{ %>
+    @Schema(description = "${modelProperty}", required = <% print(!field.metaInfo.nullable); %>)
+                <% } %>
+            <% } %>
+        <% } %>
+        <% /*非空判断*/ %>
+        <% if(!field.metaInfo.nullable) { %>
+            <% if(field.columnType == "INTEGER" || field.columnType == "LONG") { %>
+    @get:NotNull(message = "${fieldComment}不能为空")
+            <% } else if(field.columnType == "STRING") { %>
+    @get:NotEmpty(message = "${fieldComment}不能为空")
+    @get:Size(max = ${field.metaInfo.length}, message = "${fieldComment}长度不能超过${field.metaInfo.length}")
+            <% } %>
+        <% } %>
+        <% if(field.propertyType == 'Integer'){ %>
+    var ${field.propertyName}: Int? = null,
+        <% }else{ %>
+    var ${field.propertyName}: ${field.propertyType}? = null,
+        <% } %>
+    <% } %>
+<% } %>
+<%/**
+
+普通字段
+说明：父类之外的字段
+
+*/%>
+<% for(field in table.fields){ %>
+
+    <%
+        /* 非主键、非逻辑删除字段、非填充字段才显示*/
+        // @ApiModelProperty去除换行
+        var modelProperty = field.comment;
+        if(strutil.index(modelProperty, "\n") != -1) {
+            modelProperty = reg.replace(modelProperty, "\\n", "");
+        }
+        var fieldComment = strutil.split(field.comment, " ")[0];
+    %>
+    <% if(!field.keyFlag && !field.logicDeleteField && isEmpty(field.fill)){ %>
+        <% if(isNotEmpty(field.comment)){ %>
+    /** ${modelProperty} */
+            <% /* 加swagger注解 */ %>
+            <% if(swagger){ %>
+                <% if(isSpringFox) { %>
+    @ApiModelProperty(value = "${modelProperty}", required = <% print(!field.metaInfo.nullable); %>)
+                <% }else{ %>
+    @Schema(description = "${modelProperty}", required = <% print(!field.metaInfo.nullable); %>)
+                <% } %>
+            <% } %>
+        <% } %>
+        <% /*非空判断*/ %>
+        <% if(!field.metaInfo.nullable) { %>
+            <% if(field.columnType == "INTEGER" || field.columnType == "LONG") { %>
+    @get:NotNull(message = "${fieldComment}不能为空")
+            <% } else if(field.columnType == "STRING") { %>
+    @get:NotEmpty(message = "${fieldComment}不能为空")
+    @get:Size(max = ${field.metaInfo.length}, message = "${fieldComment}长度不能超过${field.metaInfo.length}")
+            <% } %>
+        <% } %>
+        <% if(field.propertyType == 'Integer'){ %>
+    var ${field.propertyName}: Int? = null,
+        <% }else{ %>
+    var ${field.propertyName}: ${field.propertyType}? = null,
+        <% } %>
+    <% } %>
+<% } %>
+)

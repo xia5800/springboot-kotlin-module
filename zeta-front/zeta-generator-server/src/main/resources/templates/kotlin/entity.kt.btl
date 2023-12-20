@@ -1,0 +1,173 @@
+package ${package.Entity}
+
+<% for(pkg in table.importPackages){ %>
+import ${pkg}
+<% } %>
+<% if(swagger){ %>
+    <% if(isSpringFox) { %>
+import io.swagger.annotations.ApiModel
+import io.swagger.annotations.ApiModelProperty
+    <% }else{ %>
+import io.swagger.v3.oas.annotations.media.Schema
+    <% } %>
+<% } %>
+<% if(isJakarta){ %>
+import jakarta.validation.constraints.*
+<% }else{ %>
+import javax.validation.constraints.*
+<% } %>
+<%
+/* 主键字段的类型 */
+var IdType = "";
+for(field in table.commonFields){
+    if(field.keyFlag) {
+        if(field.propertyType == "Integer") {
+            IdType = "Int";
+        } else {
+            IdType = field.propertyType;
+        }
+        break;
+    }
+}
+/* state字段的类型 */
+var StateType = "";
+for(field in table.commonFields){
+    if(field.name == "state") {
+        if(field.propertyType == "Integer") {
+            StateType = "Int";
+        } else {
+            StateType = field.propertyType;
+        }
+        break;
+    }
+}
+%>
+
+/**
+ * ${table.comment!}
+ *
+ * @author ${author}
+ * @date ${date}
+ */
+<% if(swagger){ %>
+    <% if(isSpringFox) { %>
+@ApiModel(description = "${table.comment!''}")
+    <% }else{ %>
+@Schema(description = "${table.comment!''}")
+    <% } %>
+<% } %>
+<% if(table.convert){ %>
+@TableName(value = "${schemaName}${table.name}")
+<% } %>
+<% if(isNotEmpty(superEntityClass)){ %>
+class ${entity}: ${superEntityClass}<% if(superEntityClass == "StateEntity"){ %><${IdType}, ${StateType}>()<% } else if (superEntityClass == "TreeEntity") { %><${entity}, ${IdType}>()<% } else { %><${IdType}>()<%}%> {
+<% }else if(activeRecord){ %>
+class ${entity}: Model<${entity}>() {
+<% }else if(entitySerialVersionUID){ %>
+class ${entity}: Serializable {
+<% }else{ %>
+class ${entity} {
+<% } %>
+<% /** -----------BEGIN 字段循环遍历----------- **/ %>
+<% for(field in table.fields){ %>
+    <%
+        if(field.keyFlag){
+            var keyPropertyName = field.propertyName;
+        }
+        // @ApiModelProperty去除换行
+        var modelProperty = field.comment;
+        if(strutil.index(modelProperty, "\n") != -1) {
+            modelProperty = reg.replace(modelProperty, "\\n", "");
+        }
+        var fieldComment = strutil.split(field.comment, " ")[0];
+    %>
+
+    <% if(isNotEmpty(field.comment)){ %>
+    /** ${modelProperty} */
+        <% /* 加swagger注解 */ %>
+        <% if(swagger){ %>
+            <% if(isSpringFox) { %>
+    @ApiModelProperty(value = "${modelProperty}", required = <% print(!field.metaInfo.nullable); %>)
+            <% }else{ %>
+    @Schema(description = "${modelProperty}", required = <% print(!field.metaInfo.nullable); %>)
+            <% } %>
+        <% } %>
+    <% } %>
+    <% /* 非空判断 */ %>
+    <% if(!field.metaInfo.nullable && !field.logicDeleteField) { %>
+        <% if(field.columnType == "INTEGER" || field.columnType == "LONG") { %>
+    @get:NotNull(message = "${fieldComment}不能为空")
+        <% } else if(field.columnType == "STRING") { %>
+    @get:NotBlank(message = "${fieldComment}不能为空")
+    @get:Size(max = ${field.metaInfo.length}, message = "${fieldComment}长度不能超过${field.metaInfo.length}")
+        <% } %>
+    <% } %>
+    <% if(field.keyFlag){ %>
+        <% /*主键*/ %>
+        <% if(field.keyIdentityFlag){ %>
+    @TableId(value = "${field.annotationColumnName}", type = IdType.AUTO)
+        <% }else if(isNotEmpty(idType)){ %>
+    @TableId(value = "${field.annotationColumnName}", type = IdType.${idType})
+        <% }else if(field.convert){ %>
+    @TableId("${field.columnName}")
+         <% } %>
+    <% }else if(isNotEmpty(field.fill)){ %>
+        <% /* 普通字段 */ %>
+        <% if(field.convert){ %>
+    @TableField(value = "${field.annotationColumnName}", fill = FieldFill.${field.fill})
+        <% }else{ %>
+    @TableField(fill = FieldFill.${field.fill})
+        <% } %>
+    <% }else if(field.convert && !field.logicDeleteField){ %>
+    @TableField(value = "${field.annotationColumnName}")
+    <% } %>
+    <%
+    /*乐观锁注解*/
+    %>
+    <% if(field.versionField){ %>
+    @Version
+    <% } %>
+    <%
+    /*逻辑删除注解*/
+    %>
+    <% if(field.logicDeleteField){ %>
+    @TableLogic
+    <% } %>
+    <% if(field.propertyType == 'Integer'){ %>
+    var ${field.propertyName}: Int? = null
+    <% }else{ %>
+    var ${field.propertyName}: ${field.propertyType}? = null
+    <% } %>
+<% } %>
+<% /** -----------END 字段循环遍历----------- **/ %>
+<% if(entityColumnConstant){ %>
+    companion object {
+   <% for(field in table.fields){ %>
+    const val ${strutil.toUpperCase(field.name)} : String = "${field.name}"
+   <% } %>
+    }
+<% } %>
+
+
+<% /** -----------toString----------- **/ %>
+<%
+    /** toString字段内容 */
+    var toString = "";
+    // 父类公共字段
+    for(field in table.commonFields){
+        toString += field.propertyName+"=$"+field.propertyName+", ";
+    }
+    // 普通字段
+    for(field in table.fields){
+        if(fieldLP.last) {
+            toString += field.propertyName+"=$"+field.propertyName;
+        }else {
+            toString += field.propertyName+"=$"+field.propertyName+", ";
+        }
+    }
+%>
+    override fun toString(): String {
+        return "${entity}(${toString})"
+    }
+
+}

@@ -1,0 +1,92 @@
+package ${customPackage.dtoPackagePath};
+
+<% if(swagger){ %>
+    <% if(isSpringFox) { %>
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
+    <% }else{ %>
+import io.swagger.v3.oas.annotations.media.Schema;
+    <% } %>
+<% } %>
+import lombok.*;
+import lombok.experimental.Accessors;
+
+import java.io.Serializable;
+import ${timePackage};
+<% if(!isEmpty(bigDecimalPackage)) { %>
+import ${bigDecimalPackage};
+<% } %>
+
+/**
+ * ${table.comment!} 详情
+ *
+ * @author ${author}
+ * @date ${date}
+ */
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@Accessors(chain = true)
+@ToString(callSuper = true)
+@EqualsAndHashCode(callSuper = false)
+<% if(swagger){ %>
+    <% if(isSpringFox) { %>
+@ApiModel(description = "${table.comment!''}详情")
+    <% }else{ %>
+@Schema(description = "${table.comment!''}")
+    <% } %>
+<% } %>
+public class ${customPackage.entityDTO} implements Serializable {
+
+    private static final long serialVersionUID = 1L;
+<% /** 父类中公有字段 */  %>
+<% for(field in table.commonFields){ %>
+
+    <%
+        // @ApiModelProperty去除换行
+        var modelProperty = field.comment;
+        if(strutil.index(modelProperty, "\n") != -1) {
+            modelProperty = reg.replace(modelProperty, "\\n", "");
+        }
+    %>
+    <% if(isNotEmpty(field.comment)){ %>
+    /** ${modelProperty} */
+        <% /* 加swagger注解 */ %>
+        <% if(swagger){ %>
+            <% if(isSpringFox) { %>
+    @ApiModelProperty(value = "${modelProperty}")
+            <% }else{ %>
+    @Schema(description = "${modelProperty}")
+            <% } %>
+        <% } %>
+    <% } %>
+    private ${field.propertyType} ${field.propertyName};
+<% } %>
+<% /** 普通字段 */  %>
+<% for(field in table.fields){ %>
+
+    <%
+        /*非逻辑删除字段才显示*/
+        // @ApiModelProperty去除换行
+        var modelProperty = field.comment;
+        if(strutil.index(modelProperty, "\n") != -1) {
+            modelProperty = reg.replace(modelProperty, "\\n", "");
+        }
+    %>
+    <% if(!field.logicDeleteField){ %>
+        <% if(isNotEmpty(field.comment)){ %>
+    /** ${modelProperty} */
+            <% /* 加swagger注解 */ %>
+            <% if(swagger){ %>
+                <% if(isSpringFox) { %>
+    @ApiModelProperty(value = "${modelProperty}")
+                <% }else{ %>
+    @Schema(description = "${modelProperty}")
+                <% } %>
+            <% } %>
+        <% } %>
+    private ${field.propertyType} ${field.propertyName};
+    <% } %>
+<% } %>
+}

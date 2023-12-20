@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="${package.Mapper}.${table.mapperName}">
+
+<% if(enableCache){ %>
+    <!-- 开启二级缓存 -->
+    <cache type="${cacheClassName}"/>
+
+<% } %>
+<% if(baseResultMap){ %>
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="${package.Entity}.${entity}">
+<% for(field in table.fields){ %>
+   <% /** 生成主键排在第一位 **/ %>
+   <% if(field.keyFlag){ %>
+        <id column="${field.name}" jdbcType="${field.metaInfo.jdbcType}" property="${field.propertyName}" />
+   <% } %>
+<% } %>
+<% for(field in table.commonFields){ %>
+    <% /** 生成公共字段 **/ %>
+    <% if(field.keyFlag){ %>
+        <id column="${field.name}" jdbcType="${field.metaInfo.jdbcType}" property="${field.propertyName}" />
+    <% } else { %>
+        <result column="${field.name}" jdbcType="${field.metaInfo.jdbcType}" property="${field.propertyName}" />
+    <% } %>
+<% } %>
+<% for(field in table.fields){ %>
+   <% /** 生成普通字段 **/ %>
+   <% if(!field.keyFlag){ %>
+        <result column="${field.name}" jdbcType="${field.metaInfo.jdbcType}" property="${field.propertyName}" />
+   <% } %>
+<% } %>
+    </resultMap>
+<% } %>
+
+<% if(baseColumnList){ %>
+    <!-- 表名 -->
+    <sql id="TABLE_NAME">
+        ${table.name}
+    </sql>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+    <%
+        /** 处理公共字段 */
+        var commonFields = "";
+        for(field in table.commonFields){
+            commonFields += field.columnName+", ";
+        }
+    %>
+        ${commonFields}
+        ${table.fieldNames}
+    </sql>
+
+    <!-- 用法：<include refid="${strutil.toUpperCase(table.name)}_JOIN_COLUMN_LIST"><property name="tableName" value="t1"/></include>, -->
+    <!-- 关联查询字段列 -->
+    <sql id="${strutil.toUpperCase(table.name)}_JOIN_COLUMN_LIST">
+    <%
+        /** 处理公共字段 */
+        var joinCommonFields = "";
+        for(field in table.commonFields){
+            joinCommonFields += "${tableName}."+field.columnName+", ";
+        }
+        /** 处理普通字段 */
+        var sqlFields = "";
+        for(field in table.fields){
+            if(fieldLP.last) {
+                sqlFields += "${tableName}."+field.name;
+            }else {
+                // 每5个字段换一行
+                if(fieldLP.dataIndex % 5 == 0 && fieldLP.dataIndex != 0) {
+                    sqlFields += "${tableName}."+field.name+", \n        ";
+                }else {
+                    sqlFields += "${tableName}."+field.name+", ";
+                }
+            }
+        }
+    %>
+        ${joinCommonFields}
+        ${sqlFields}
+    </sql>
+
+    <!-- 通用查询条件 -->
+    <sql id="Base_Where">
+        <where>
+            <%
+               // 处理公共字段
+               for(field in table.commonFields){
+            %>
+            <if test="param.${field.propertyName} != null and param.${field.propertyName} != ''">
+                AND ${field.name} <% if(field.columnType != "STRING") { %>= #{param.${field.propertyName}}<% } else { %>LIKE CONCAT('%', #{param.${field.propertyName}}, '%') <% } %>
+            </if>
+            <% } %>
+            <%
+               // 处理普通字段
+               for(field in table.fields){
+            %>
+            <if test="param.${field.propertyName} != null and param.${field.propertyName} != ''">
+                AND ${field.name} <% if(field.columnType != "STRING") { %>= #{param.${field.propertyName}}<% } else { %>LIKE CONCAT('%', #{param.${field.propertyName}}, '%') <% } %>
+            </if>
+            <% } %>
+        </where>
+    </sql>
+
+<% } %>
+</mapper>
