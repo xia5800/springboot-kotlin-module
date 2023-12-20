@@ -5,11 +5,14 @@ import com.zeta.biz.quartz.dao.QrtzTriggersMapper
 import com.zeta.biz.quartz.service.IQrtzTriggersService
 import com.zeta.model.quartz.entity.QrtzTriggers
 import com.zeta.model.quartz.param.JobQueryParam
+import org.quartz.JobKey
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.zetaframework.base.param.PageParam
 import org.zetaframework.base.result.PageResult
+import org.zetaframework.core.utils.JSONUtil
 import org.zetaframework.quartz.module.QuartzJobDetailDTO
+import org.zetaframework.quartz.utils.QuartzManager
 import org.zetaframework.quartz.utils.QuartzUtil
 
 /**
@@ -21,7 +24,7 @@ import org.zetaframework.quartz.utils.QuartzUtil
  * @date 2022-09-05 13:05:14
  */
 @Service
-class QrtzTriggersServiceImpl: IQrtzTriggersService, ServiceImpl<QrtzTriggersMapper, QrtzTriggers>() {
+class QrtzTriggersServiceImpl(private val quartzManager: QuartzManager): IQrtzTriggersService, ServiceImpl<QrtzTriggersMapper, QrtzTriggers>() {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     /**
@@ -30,12 +33,29 @@ class QrtzTriggersServiceImpl: IQrtzTriggersService, ServiceImpl<QrtzTriggersMap
      * @param param PageParam<JobQueryParam> 任务查询参数
      */
     override fun customPage(param: PageParam<JobQueryParam>): PageResult<QuartzJobDetailDTO> {
+        // 构造分页对象
         val page = param.buildPage<QuartzJobDetailDTO>()
+
+        // 分页查询
         val triggerList = baseMapper.customPage(page, param.model ?: JobQueryParam())
-        // 修改触发器状态
-        triggerList.forEach { it.triggerState = QuartzUtil.jdbcTriggerTypeConvert(it.triggerState) }
+
+        // 返回值处理
+        if (triggerList.isNotEmpty()) {
+            val schedule = quartzManager.getScheduler()
+
+            // 修改触发器状态
+            triggerList.forEach {
+                // 将数据库中触发器状态 转换成 Quartz TriggerState枚举对应的状态
+                it.triggerState = QuartzUtil.jdbcTriggerTypeConvert(it.triggerState)
+
+                // 获取jobParam
+                val jobDetail = schedule.getJobDetail(JobKey(it.jobName, it.jobGroupName))
+                it.jobParam = JSONUtil.toJsonStr(jobDetail.jobDataMap)
+            }
+        }
+
+        // 构造分页结果
         return PageResult(triggerList, page.total)
     }
-
 
 }
