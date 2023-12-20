@@ -33,6 +33,10 @@
         <!--
         组件模块(zeta-components里面的)
         -->
+        <dependency>
+            <groupId>com.zeta</groupId>
+            <artifactId>zeta-quartz-starter</artifactId>
+        </dependency>
 
 
         <!--

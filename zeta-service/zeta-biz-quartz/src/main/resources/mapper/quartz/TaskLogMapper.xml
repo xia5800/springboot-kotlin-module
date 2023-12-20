@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zeta.biz.quartz.dao.TaskLogMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.zeta.model.quartz.entity.TaskLog">
+        <id column="id" jdbcType="BIGINT" property="id" />
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+        <result column="created_by" jdbcType="BIGINT" property="createdBy" />
+        <result column="type" jdbcType="VARCHAR" property="type" />
+        <result column="trigger_name" jdbcType="VARCHAR" property="jobName" />
+        <result column="trigger_group" jdbcType="VARCHAR" property="jobName" />
+        <result column="job_name" jdbcType="VARCHAR" property="jobName" />
+        <result column="job_description" jdbcType="VARCHAR" property="jobDescription" />
+        <result column="job_class_name" jdbcType="VARCHAR" property="jobClassName" />
+        <result column="job_param" jdbcType="VARCHAR" property="jobParam" />
+        <result column="result" jdbcType="LONGVARCHAR" property="result" />
+        <result column="exception" jdbcType="LONGVARCHAR" property="exception" />
+        <result column="spend_time" jdbcType="INTEGER" property="spendTime" />
+    </resultMap>
+
+    <!-- 表名 -->
+    <sql id="TABLE_NAME">
+        task_log
+    </sql>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, create_time, created_by, 
+        type, trigger_name, trigger_group, job_name, job_group, job_description,
+        job_class_name, job_param, result, exception, spend_time
+    </sql>
+
+    <!-- 用法：<include refid="TASK_LOG_JOIN_COLUMN_LIST"><property name="tableName" value="t1"/></include>, -->
+    <!-- 关联查询字段列 -->
+    <sql id="TASK_LOG_JOIN_COLUMN_LIST">
+        ${tableName}.id, ${tableName}.create_time, ${tableName}.created_by,
+        ${tableName}.type, ${tableName}.trigger_name, ${tableName}.trigger_group, ${tableName}.job_name,
+        ${tableName}.job_description, ${tableName}.job_class_name, ${tableName}.job_param, ${tableName}.result,
+        ${tableName}.exception, ${tableName}.spend_time
+    </sql>
+
+    <!-- 通用查询条件 -->
+    <sql id="Base_Where">
+        <where>
+            <if test="param.id != null">
+                AND id = #{param.id}
+            </if>
+            <if test="param.createTime != null">
+                AND create_time = #{param.createTime}
+            </if>
+            <if test="param.createdBy != null">
+                AND created_by = #{param.createdBy}
+            </if>
+            <if test="param.type != null and param.type != ''">
+                AND type = #{param.type}
+            </if>
+            <if test="param.triggerName != null and param.triggerName != ''">
+                AND trigger_name LIKE CONCAT('%', #{param.triggerName}, '%')
+            </if>
+            <if test="param.triggerGroup != null and param.triggerGroup != ''">
+                AND trigger_group LIKE CONCAT('%', #{param.triggerGroup}, '%')
+            </if>
+            <if test="param.jobName != null and param.jobName != ''">
+                AND job_name LIKE CONCAT('%', #{param.jobName}, '%') 
+            </if>
+            <if test="param.jobDescription != null and param.jobDescription != ''">
+                AND job_description LIKE CONCAT('%', #{param.jobDescription}, '%') 
+            </if>
+            <if test="param.jobClassName != null and param.jobClassName != ''">
+                AND job_class_name LIKE CONCAT('%', #{param.jobClassName}, '%') 
+            </if>
+            <if test="param.result != null and param.result != ''">
+                AND result LIKE CONCAT('%', #{param.result}, '%') 
+            </if>
+            <if test="param.exception != null and param.exception != ''">
+                AND exception LIKE CONCAT('%', #{param.exception}, '%') 
+            </if>
+            <if test="param.spendTime != null">
+                AND spend_time = #{param.spendTime}
+            </if>
+        </where>
+    </sql>
+
+    <!-- 分页查询任务调度日志 -->
+    <select id="customPage" resultType="com.zeta.model.quartz.dto.taskLog.TaskLogDTO">
+        SELECT
+            <include refid="TASK_LOG_JOIN_COLUMN_LIST"><property name="tableName" value="t1"/></include>,
+            t2.CRON_EXPRESSION AS cron
+        FROM task_log t1
+        LEFT JOIN QRTZ_CRON_TRIGGERS t2 ON t1.trigger_name = t2.TRIGGER_NAME AND t1.trigger_group = t2.TRIGGER_GROUP
+        <where>
+            <if test="param.id != null">
+                AND t1.id = #{param.id}
+            </if>
+            <if test="param.createTime != null">
+                AND t1.create_time = #{param.createTime}
+            </if>
+            <if test="param.type != null and param.type != ''">
+                AND t1.type = #{param.type}
+            </if>
+            <if test="param.triggerName != null and param.triggerName != ''">
+                AND t1.trigger_name LIKE CONCAT('%', #{param.triggerName}, '%')
+            </if>
+            <if test="param.triggerGroup != null and param.triggerGroup != ''">
+                AND t1.trigger_group LIKE CONCAT('%', #{param.triggerGroup}, '%')
+            </if>
+            <if test="param.jobName != null and param.jobName != ''">
+                AND t1.job_name LIKE CONCAT('%', #{param.jobName}, '%')
+            </if>
+            <if test="param.jobDescription != null and param.jobDescription != ''">
+                AND t1.job_description LIKE CONCAT('%', #{param.jobDescription}, '%')
+            </if>
+            <if test="param.jobClassName != null and param.jobClassName != ''">
+                AND t1.job_class_name LIKE CONCAT('%', #{param.jobClassName}, '%')
+            </if>
+            <if test="param.result != null and param.result != ''">
+                AND t1.result LIKE CONCAT('%', #{param.result}, '%')
+            </if>
+            <if test="param.exception != null and param.exception != ''">
+                AND t1.exception LIKE CONCAT('%', #{param.exception}, '%')
+            </if>
+            <if test="param.spendTime != null">
+                AND t1.spend_time = #{param.spendTime}
+            </if>
+        </where>
+    </select>
+
+</mapper>

@@ -4,6 +4,7 @@ import cn.hutool.core.util.EnumUtil
 import cn.hutool.core.util.StrUtil
 import com.fasterxml.jackson.core.type.TypeReference
 import com.github.xiaoymin.knife4j.annotations.ApiOperationSupport
+import com.github.xiaoymin.knife4j.annotations.ApiSupport
 import com.zeta.biz.quartz.service.IQrtzTriggersService
 import com.zeta.model.quartz.dto.JobSaveDTO
 import com.zeta.model.quartz.dto.JobTriggerUpdateDTO
@@ -42,8 +43,9 @@ import org.zetaframework.quartz.utils.QuartzManager
  *
  * @author gcc
  */
+@ApiSupport(order = 1)
 @Api(tags = ["定时任务"])
-@PreAuth(replace = "sys:task", enabled = false)
+@PreAuth(replace = "task")
 @RestController
 @RequestMapping("/api/job")
 class JobController(
@@ -156,11 +158,11 @@ class JobController(
 
         // 构造cron触发器
         val cronTrigger = CronTriggerBuilder(
-            name = saveDTO.jobName!!,
+            name = saveDTO.triggerName!!,
             cron = saveDTO.cron!!,
             priority = priority!!,
             groupName = triggerGroupName!!,
-            description = saveDTO.jobDescription
+            description = saveDTO.triggerDescription
         )
 
         // 创建一个CronJob
