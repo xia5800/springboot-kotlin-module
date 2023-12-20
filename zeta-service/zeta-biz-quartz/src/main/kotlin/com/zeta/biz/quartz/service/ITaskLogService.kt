@@ -1,9 +1,9 @@
 package com.zeta.biz.quartz.service
 
-import com.zeta.model.quartz.entity.TaskLog
 import com.baomidou.mybatisplus.extension.service.IService
 import com.zeta.model.quartz.dto.JobInfoDTO
 import com.zeta.model.quartz.dto.taskLog.TaskLogDTO
+import com.zeta.model.quartz.entity.TaskLog
 import com.zeta.model.quartz.param.TaskLogQueryParam
 import org.zetaframework.base.param.PageParam
 import org.zetaframework.base.result.PageResult

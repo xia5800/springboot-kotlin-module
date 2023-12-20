@@ -3,7 +3,6 @@ package com.zeta.generator
 import com.zeta.generator.engine.CodeGeneratorConfig
 import com.zeta.generator.engine.Generator
 import com.zeta.generator.enums.EntityTypeEnum
-import com.zeta.generator.enums.LanguageTypeEnum
 
 /**
  * Main方法

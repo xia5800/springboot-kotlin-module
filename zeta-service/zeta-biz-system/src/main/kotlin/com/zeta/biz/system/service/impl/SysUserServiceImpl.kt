@@ -1,26 +1,21 @@
 package com.zeta.biz.system.service.impl
 
 import cn.dev33.satoken.secure.BCrypt
-import cn.dev33.satoken.stp.StpInterface
 import cn.hutool.core.bean.BeanUtil
-import cn.hutool.core.collection.CollUtil
 import com.baomidou.mybatisplus.extension.kotlin.KtQueryWrapper
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl
 import com.zeta.biz.system.dao.SysUserMapper
-import com.zeta.biz.system.service.ISysRoleMenuService
 import com.zeta.biz.system.service.ISysUserRoleService
 import com.zeta.biz.system.service.ISysUserService
 import com.zeta.model.system.dto.sysRole.SysRoleDTO
 import com.zeta.model.system.dto.sysUser.SysUserDTO
 import com.zeta.model.system.dto.sysUser.SysUserSaveDTO
 import com.zeta.model.system.dto.sysUser.SysUserUpdateDTO
-import com.zeta.model.system.entity.SysMenu
 import com.zeta.model.system.entity.SysRole
 import com.zeta.model.system.entity.SysUser
 import com.zeta.model.system.enums.UserStateEnum
 import com.zeta.model.system.param.SysUserQueryParam
 import org.springframework.cache.annotation.CacheEvict
-import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.zetaframework.base.exception.BusinessException

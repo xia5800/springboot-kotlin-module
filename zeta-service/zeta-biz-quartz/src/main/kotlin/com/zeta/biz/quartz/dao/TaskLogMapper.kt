@@ -1,9 +1,9 @@
 package com.zeta.biz.quartz.dao
 
-import com.zeta.model.quartz.entity.TaskLog
 import com.baomidou.mybatisplus.core.mapper.BaseMapper
 import com.baomidou.mybatisplus.core.metadata.IPage
 import com.zeta.model.quartz.dto.taskLog.TaskLogDTO
+import com.zeta.model.quartz.entity.TaskLog
 import com.zeta.model.quartz.param.TaskLogQueryParam
 import org.apache.ibatis.annotations.Param
 import org.springframework.stereotype.Repository

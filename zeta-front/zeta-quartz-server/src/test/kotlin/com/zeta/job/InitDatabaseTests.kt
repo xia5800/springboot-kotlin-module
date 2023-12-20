@@ -1,10 +1,10 @@
 package com.zeta.job
 
-import com.zeta.biz.system.service.*
+import com.zeta.biz.system.service.ISysMenuService
+import com.zeta.biz.system.service.ISysRoleMenuService
 import com.zeta.model.system.entity.SysMenu
 import com.zeta.model.system.entity.SysRoleMenu
 import com.zeta.model.system.enums.MenuTypeEnum
-import org.junit.jupiter.api.Test
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.TestConstructor
 import org.zetaframework.mybatisplus.generator.UidGenerator

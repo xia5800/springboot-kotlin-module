@@ -1,6 +1,5 @@
 package com.zeta.model.system.entity
 
-import com.baomidou.mybatisplus.annotation.SqlCondition
 import com.baomidou.mybatisplus.annotation.TableField
 import com.baomidou.mybatisplus.annotation.TableLogic
 import com.baomidou.mybatisplus.annotation.TableName

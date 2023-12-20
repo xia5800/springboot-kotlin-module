@@ -12,7 +12,6 @@ import com.zeta.model.quartz.entity.QrtzTriggers
 import com.zeta.model.quartz.param.JobOperationParam
 import com.zeta.model.quartz.param.JobQueryParam
 import com.zeta.model.quartz.result.JobClassListResult
-import com.zeta.model.system.entity.SysUser
 import io.swagger.annotations.Api
 import io.swagger.annotations.ApiOperation
 import org.quartz.Job
