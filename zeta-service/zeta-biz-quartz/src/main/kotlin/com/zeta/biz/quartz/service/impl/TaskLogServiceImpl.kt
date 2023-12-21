@@ -43,14 +43,14 @@ class TaskLogServiceImpl: ITaskLogService, ServiceImpl<TaskLogMapper, TaskLog>()
      * 异步保存任务调度日志
      *
      * @param jobInfo 任务信息
-     * @param type 日志类型
      * @param spendTime 执行耗时
+     * @param type 日志类型
      * @param result 执行结果
      * @param exception 异常内容
      * @return
      */
     @Async
-    override fun asyncSave(jobInfo: JobInfoDTO, type: String, spendTime: Long, result: String?, exception: Throwable?) {
+    override fun asyncSave(jobInfo: JobInfoDTO, spendTime: Long, type: String, result: String?, exception: Throwable?) {
         // 处理异常内容
         val exceptionStr = exception?.let { ExceptionUtil.stacktraceToString(exception, MAX_LENGTH) }
 

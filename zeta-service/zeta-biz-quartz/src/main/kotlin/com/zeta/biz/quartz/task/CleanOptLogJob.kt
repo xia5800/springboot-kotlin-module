@@ -60,7 +60,7 @@ class CleanOptLogJob(
 
         // 记录日志
         val spendTime = System.currentTimeMillis() - startTime
-        taskLogService.asyncSave(jobInfoDTO, JobLogTypeEnum.SUCCESS.name, spendTime, JobLogTypeEnum.SUCCESS.desc)
+        taskLogService.asyncSave(jobInfoDTO, spendTime, JobLogTypeEnum.SUCCESS.name, JobLogTypeEnum.SUCCESS.desc)
 
         logger.info("================ 清理系统操作日志 任务执行完毕 ================")
     }

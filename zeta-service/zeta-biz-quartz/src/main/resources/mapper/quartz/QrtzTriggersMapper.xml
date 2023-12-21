@@ -115,17 +115,29 @@
         LEFT JOIN QRTZ_CRON_TRIGGERS t3 ON t1.TRIGGER_NAME = t3.TRIGGER_NAME
             AND t1.TRIGGER_GROUP = t3.TRIGGER_GROUP
         <where>
-            <if test="param.jobName != null">
-                AND t1.JOB_NAME LIKE CONCAT('%', #{param.jobName}, '%')
+            <if test="param.triggerName != null and param.triggerName != ''">
+                AND t1.TRIGGER_NAME LIKE CONCAT('%', #{param.triggerName}, '%')
             </if>
-            <if test="param.triggerState != null">
+            <if test="param.triggerGroup != null and param.triggerGroup != ''">
+                AND t1.TRIGGER_GROUP LIKE CONCAT('%', #{param.triggerGroup}, '%')
+            </if>
+            <if test="param.triggerDescription != null and param.triggerDescription != ''">
+                AND t1.DESCRIPTION LIKE CONCAT('%', #{param.triggerDescription}, '%')
+            </if>
+            <if test="param.jobName != null and param.jobName != ''">
+                AND t2.JOB_NAME LIKE CONCAT('%', #{param.jobName}, '%')
+            </if>
+            <if test="param.jobGroup != null and param.jobGroup != ''">
+                AND t2.JOB_GROUP LIKE CONCAT('%', #{param.jobGroup}, '%')
+            </if>
+            <if test="param.jobDescription != null and param.jobDescription != ''">
+                AND t2.DESCRIPTION LIKE CONCAT('%', #{param.jobDescription}, '%')
+            </if>
+            <if test="param.triggerState != null and param.triggerState != ''">
                 AND t1.TRIGGER_STATE = #{param.triggerState}
             </if>
-            <if test="param.description != null">
-                AND t1.DESCRIPTION LIKE CONCAT('%', #{param.description}, '%')
-            </if>
-            <if test="param.jobClassName != null">
-                AND t2.JOB_CLASS_NAME = ${param.jobClassName}
+            <if test="param.jobClassName != null and param.jobClassName != ''">
+                AND t2.JOB_CLASS_NAME = #{param.jobClassName}
             </if>
         </where>
     </select>
