@@ -74,13 +74,13 @@ class ApiResult<T> {
 
     companion object {
         /** 成功码 */
-        const val SUCCESS_CODE = 200
+        const val SUCCESS_CODE = 0
         /** 成功描述 */
-        const val SUCCESS_MSG = "OK"
+        const val SUCCESS_MSG = "操作成功"
         /** 失败码 */
         const val FAIL_CODE = -1
         /** 失败描述 */
-        const val FAIL_MSG = "ERR"
+        const val FAIL_MSG = "操作失败"
 
         /**
          * 返回结果
