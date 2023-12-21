@@ -49,7 +49,7 @@ class QrtzTriggersServiceImpl(private val quartzManager: QuartzManager): IQrtzTr
                 it.triggerState = QuartzUtil.jdbcTriggerTypeConvert(it.triggerState)
 
                 // 获取jobParam
-                val jobDetail = schedule.getJobDetail(JobKey(it.jobName, it.jobGroupName))
+                val jobDetail = schedule.getJobDetail(JobKey(it.jobName, it.jobGroup))
                 it.jobParam = JSONUtil.toJsonStr(jobDetail.jobDataMap)
             }
         }

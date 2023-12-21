@@ -28,13 +28,13 @@ data class JobTriggerUpdateDTO(
     var cron: String? = null,
 
 
-    /** 旧触发器组名称 */
-    @ApiModelProperty(value = "旧触发器组名称", required = false)
-    var oldGroupName: String? = null,
+    /** 旧触发器组 */
+    @ApiModelProperty(value = "旧触发器组", required = false)
+    var oldGroup: String? = null,
 
-    /** 触发器组名称 */
-    @ApiModelProperty(value = "新触发器组名称", required = false)
-    var triggerGroupName: String? = null,
+    /** 触发器组 */
+    @ApiModelProperty(value = "新触发器组", required = false)
+    var triggerGroup: String? = null,
 
     /** 触发器描述 */
     @ApiModelProperty(value = "新触发器描述", required = false)

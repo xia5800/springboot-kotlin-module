@@ -139,8 +139,8 @@ class JobController(
         }
 
         // 设置默认值
-        val jobGroupName = if (StrUtil.isBlank(saveDTO.jobGroupName)) Scheduler.DEFAULT_GROUP else saveDTO.jobGroupName
-        val triggerGroupName = if (StrUtil.isBlank(saveDTO.triggerGroupName)) Scheduler.DEFAULT_GROUP else saveDTO.triggerGroupName
+        val jobGroup = if (StrUtil.isBlank(saveDTO.jobGroup)) Scheduler.DEFAULT_GROUP else saveDTO.jobGroup
+        val triggerGroup = if (StrUtil.isBlank(saveDTO.triggerGroup)) Scheduler.DEFAULT_GROUP else saveDTO.triggerGroup
         val priority = if (saveDTO.priority == null) Trigger.DEFAULT_PRIORITY else saveDTO.priority
 
         // 处理任务参数 string -> Map<string, object>  ps: 转换失败返回null
@@ -150,7 +150,7 @@ class JobController(
         val jobDetail = JobDetailBuilder(
             name = saveDTO.jobName!!,
             jobClazz = jobClazz,
-            groupName = jobGroupName!!,
+            groupName = jobGroup!!,
             description = saveDTO.jobDescription,
             param = jobParam
         )
@@ -160,7 +160,7 @@ class JobController(
             name = saveDTO.triggerName!!,
             cron = saveDTO.cron!!,
             priority = priority!!,
-            groupName = triggerGroupName!!,
+            groupName = triggerGroup!!,
             description = saveDTO.triggerDescription
         )
 
@@ -183,8 +183,8 @@ class JobController(
     @PutMapping
     fun update(@RequestBody @Validated updateDTO: JobTriggerUpdateDTO): ApiResult<Boolean> {
         // 设置默认值
-        val oldGroupName = if (StrUtil.isBlank(updateDTO.oldGroupName)) Scheduler.DEFAULT_GROUP else updateDTO.oldGroupName
-        val triggerGroupName = if (StrUtil.isBlank(updateDTO.triggerGroupName)) Scheduler.DEFAULT_GROUP else updateDTO.triggerGroupName
+        val oldGroup = if (StrUtil.isBlank(updateDTO.oldGroup)) Scheduler.DEFAULT_GROUP else updateDTO.oldGroup
+        val triggerGroup = if (StrUtil.isBlank(updateDTO.triggerGroup)) Scheduler.DEFAULT_GROUP else updateDTO.triggerGroup
         val priority = if (updateDTO.priority == null) Trigger.DEFAULT_PRIORITY else updateDTO.priority
 
         // 构建新的触发器
@@ -192,12 +192,12 @@ class JobController(
             name = updateDTO.triggerName!!,
             cron = updateDTO.cron!!,
             priority = priority!!,
-            groupName = triggerGroupName!!,
+            groupName = triggerGroup!!,
             description = updateDTO.triggerDescription
         )
 
         // 修改触发器
-        quartzManager.updateCronTrigger(updateDTO.oldName!!, cronTrigger, oldGroupName!!)
+        quartzManager.updateCronTrigger(updateDTO.oldName!!, cronTrigger, oldGroup!!)
         return success(true)
     }
 
@@ -213,8 +213,8 @@ class JobController(
     @SysLog
     @DeleteMapping
     fun delete(@RequestBody @Validated deleteParam: JobOperationParam): ApiResult<Boolean> {
-        val jobGroupName = if (StrUtil.isBlank(deleteParam.jobGroupName)) Scheduler.DEFAULT_GROUP else deleteParam.jobGroupName
-        quartzManager.deleteJob(deleteParam.jobName!!, jobGroupName!!)
+        val jobGroup = if (StrUtil.isBlank(deleteParam.jobGroup)) Scheduler.DEFAULT_GROUP else deleteParam.jobGroup
+        quartzManager.deleteJob(deleteParam.jobName!!, jobGroup!!)
         return success(true)
     }
 
@@ -229,8 +229,8 @@ class JobController(
     @SysLog
     @PostMapping("/pause")
     fun pause(@RequestBody @Validated pauseParam: JobOperationParam): ApiResult<Boolean> {
-        val jobGroupName = if (StrUtil.isBlank(pauseParam.jobGroupName)) Scheduler.DEFAULT_GROUP else pauseParam.jobGroupName
-        quartzManager.pauseJob(pauseParam.jobName!!, jobGroupName!!)
+        val jobGroup = if (StrUtil.isBlank(pauseParam.jobGroup)) Scheduler.DEFAULT_GROUP else pauseParam.jobGroup
+        quartzManager.pauseJob(pauseParam.jobName!!, jobGroup!!)
         return success(true)
     }
 
@@ -245,8 +245,8 @@ class JobController(
     @SysLog
     @PostMapping("/resume")
     fun resume(@RequestBody @Validated resumeParam: JobOperationParam): ApiResult<Boolean> {
-        val jobGroupName = if (StrUtil.isBlank(resumeParam.jobGroupName)) Scheduler.DEFAULT_GROUP else resumeParam.jobGroupName
-        quartzManager.resumeJob(resumeParam.jobName!!, jobGroupName!!)
+        val jobGroup = if (StrUtil.isBlank(resumeParam.jobGroup)) Scheduler.DEFAULT_GROUP else resumeParam.jobGroup
+        quartzManager.resumeJob(resumeParam.jobName!!, jobGroup!!)
         return success(true)
     }
 
@@ -259,10 +259,10 @@ class JobController(
     @ApiOperationSupport(order = 100)
     @ApiOperation(value = "立即运行一次", notes = "只会运行一次，方便测试时用")
     @SysLog
-    @PostMapping("/run")
+    @PostMapping("/runOnce")
     fun runANow(@RequestBody @Validated runParam: JobOperationParam): ApiResult<Boolean> {
-        val jobGroupName = if (StrUtil.isBlank(runParam.jobGroupName)) Scheduler.DEFAULT_GROUP else runParam.jobGroupName
-        quartzManager.runAJobNow(runParam.jobName!!, jobGroupName!!, null)
+        val jobGroup = if (StrUtil.isBlank(runParam.jobGroup)) Scheduler.DEFAULT_GROUP else runParam.jobGroup
+        quartzManager.runAJobNow(runParam.jobName!!, jobGroup!!, null)
         return success(true)
     }
 

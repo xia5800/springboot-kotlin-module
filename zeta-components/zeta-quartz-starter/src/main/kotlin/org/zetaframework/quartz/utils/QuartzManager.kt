@@ -98,11 +98,11 @@ class QuartzManager(private val scheduler: Scheduler) {
      *
      * @param triggerName       原触发器名称
      * @param jobDetail         新任务
-     * @param triggerGroupName  原触发器描述
+     * @param triggerGroup      原触发器组
      */
     @Transactional(rollbackFor = [Exception::class])
-    fun updateJob(triggerName: String, jobDetail: JobDetailBuilder, triggerGroupName: String = Scheduler.DEFAULT_GROUP) {
-        updateJob(triggerName, jobDetail.build(), triggerGroupName)
+    fun updateJob(triggerName: String, jobDetail: JobDetailBuilder, triggerGroup: String = Scheduler.DEFAULT_GROUP) {
+        updateJob(triggerName, jobDetail.build(), triggerGroup)
     }
 
     /**
@@ -110,13 +110,13 @@ class QuartzManager(private val scheduler: Scheduler) {
      *
      * @param triggerName       原触发器名称
      * @param jobDetail         新任务
-     * @param triggerGroupName  原触发器描述
+     * @param triggerGroup      原触发器组
      */
     @Transactional(rollbackFor = [Exception::class])
-    fun updateJob(triggerName: String, jobDetail: JobDetail, triggerGroupName: String = Scheduler.DEFAULT_GROUP) {
+    fun updateJob(triggerName: String, jobDetail: JobDetail, triggerGroup: String = Scheduler.DEFAULT_GROUP) {
         try {
             // 获取触发器
-            val trigger = scheduler.getTrigger(TriggerKey(triggerName, triggerGroupName))
+            val trigger = scheduler.getTrigger(TriggerKey(triggerName, triggerGroup))
 
             // 删除旧的job
             deleteJob(trigger.jobKey)
@@ -134,11 +134,11 @@ class QuartzManager(private val scheduler: Scheduler) {
      *
      * @param triggerName       原触发器名称
      * @param trigger           新触发器
-     * @param triggerGroupName  原触发器描述
+     * @param triggerGroup      原触发器组
      */
     @Transactional(rollbackFor = [Exception::class])
-    fun updateCronTrigger(triggerName: String, trigger: CronTriggerBuilder, triggerGroupName: String = Scheduler.DEFAULT_GROUP) {
-        updateTrigger(triggerName, trigger.build(), triggerGroupName)
+    fun updateCronTrigger(triggerName: String, trigger: CronTriggerBuilder, triggerGroup: String = Scheduler.DEFAULT_GROUP) {
+        updateTrigger(triggerName, trigger.build(), triggerGroup)
     }
 
     /**
@@ -146,11 +146,11 @@ class QuartzManager(private val scheduler: Scheduler) {
      *
      * @param triggerName       原触发器名称
      * @param trigger           新触发器
-     * @param triggerGroupName  原触发器描述
+     * @param triggerGroup      原触发器组
      */
     @Transactional(rollbackFor = [Exception::class])
-    fun updateTrigger(triggerName: String, trigger: Trigger, triggerGroupName: String = Scheduler.DEFAULT_GROUP) {
-        updateTrigger(TriggerKey(triggerName, triggerGroupName), trigger)
+    fun updateTrigger(triggerName: String, trigger: Trigger, triggerGroup: String = Scheduler.DEFAULT_GROUP) {
+        updateTrigger(TriggerKey(triggerName, triggerGroup), trigger)
     }
 
     /**
@@ -182,12 +182,12 @@ class QuartzManager(private val scheduler: Scheduler) {
      *   ERROR: 错误
      *   BLOCKED: 阻塞
      *
-     * @param triggerName
-     * @param triggerGroupName
+     * @param triggerName   触发器名称
+     * @param triggerGroup  触发器组
      * @return string 触发器状态
      */
-    fun getTriggerState(triggerName: String, triggerGroupName: String = Scheduler.DEFAULT_GROUP): String? {
-        return getTriggerState(TriggerKey(triggerName, triggerGroupName))
+    fun getTriggerState(triggerName: String, triggerGroup: String = Scheduler.DEFAULT_GROUP): String? {
+        return getTriggerState(TriggerKey(triggerName, triggerGroup))
     }
 
     /**
@@ -202,8 +202,8 @@ class QuartzManager(private val scheduler: Scheduler) {
      *   ERROR: 错误
      *   BLOCKED: 阻塞
      *
-     * @param triggerName
-     * @param triggerGroupName
+     * @param triggerName   触发器名称
+     * @param triggerGroup  触发器组
      * @return string 触发器状态
      */
     fun getTriggerState(triggerKey: TriggerKey): String? {
@@ -242,7 +242,7 @@ class QuartzManager(private val scheduler: Scheduler) {
      * 说明：
      * 删除job和与之关联的trigger
      * @param jobName   任务名称
-     * @param groupName 任务组名称
+     * @param groupName 任务组
      */
     @Transactional(rollbackFor = [Exception::class])
     fun deleteJob(jobName: String, groupName: String = Scheduler.DEFAULT_GROUP) {
@@ -271,7 +271,7 @@ class QuartzManager(private val scheduler: Scheduler) {
      * 暂停一个job
      *
      * @param jobName   任务名称
-     * @param groupName 任务组名称
+     * @param groupName 任务组
      */
     fun pauseJob(jobName: String, groupName: String = Scheduler.DEFAULT_GROUP) {
         try {
@@ -286,7 +286,7 @@ class QuartzManager(private val scheduler: Scheduler) {
      * 恢复一个job
      *
      * @param jobName   任务名称
-     * @param groupName 任务组名称
+     * @param groupName 任务组
      */
     fun resumeJob(jobName: String, groupName: String = Scheduler.DEFAULT_GROUP) {
         try {
@@ -306,7 +306,7 @@ class QuartzManager(private val scheduler: Scheduler) {
      * 只会运行一次，方便测试时用
      * quartz是通过临时生成一个trigger的方式来实现的，这个trigger将在本次任务运行完成之后自动删除
      * @param jobName   任务名称
-     * @param groupName 任务组名称
+     * @param groupName 任务组
      */
     fun runAJobNow(jobName: String, groupName: String = Scheduler.DEFAULT_GROUP) {
         runAJobNow(jobName, groupName, null)
@@ -320,7 +320,7 @@ class QuartzManager(private val scheduler: Scheduler) {
      * 只会运行一次，方便测试时用
      * quartz是通过临时生成一个trigger的方式来实现的，这个trigger将在本次任务运行完成之后自动删除
      * @param jobName    任务名称
-     * @param groupName  任务组名称
+     * @param groupName  任务组
      * @param jobDataMap 任务参数
      */
     fun runAJobNow(jobName: String, groupName: String = Scheduler.DEFAULT_GROUP, jobDataMap: JobDataMap?) {
@@ -381,7 +381,7 @@ private fun QuartzManager.generatorModule(trigger: Trigger, jobDetail: JobDetail
     return QuartzJobDetailDTO().apply {
         // trigger表的数据
         triggerName = triggerKey.name
-        triggerGroupName = triggerKey.group
+        triggerGroup = triggerKey.group
         triggerDescription = trigger.description
         nextFireTime = trigger.nextFireTime
         prevFireTime = trigger.previousFireTime
@@ -394,7 +394,7 @@ private fun QuartzManager.generatorModule(trigger: Trigger, jobDetail: JobDetail
 
         // job_details表的数据
         jobName = jobKey.name
-        jobGroupName = jobKey.group
+        jobGroup = jobKey.group
         jobDescription = jobDetail.description
         try {
             jobClassName = jobDetail.jobClass?.name

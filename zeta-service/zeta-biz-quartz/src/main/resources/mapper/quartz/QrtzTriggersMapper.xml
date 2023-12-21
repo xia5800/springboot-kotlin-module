@@ -94,7 +94,7 @@
     <select id="customPage" resultType="org.zetaframework.quartz.module.QuartzJobDetailDTO">
         SELECT
             t1.TRIGGER_NAME,
-            t1.TRIGGER_GROUP AS triggerGroupName,
+            t1.TRIGGER_GROUP,
             t1.DESCRIPTION AS triggerDescription,
             FROM_UNIXTIME( t1.NEXT_FIRE_TIME/1000 ,'%Y-%m-%d %H:%i:%s') AS nextFireTime,
             FROM_UNIXTIME( t1.PREV_FIRE_TIME/1000 ,'%Y-%m-%d %H:%i:%s') AS prevFireTime,
@@ -104,7 +104,7 @@
             t1.TRIGGER_STATE,
             t1.TRIGGER_TYPE,
             t2.JOB_NAME,
-            t2.JOB_GROUP AS jobGroupName,
+            t2.JOB_GROUP,
             t2.DESCRIPTION AS jobDescription,
             t2.JOB_CLASS_NAME,
             t3.CRON_EXPRESSION AS cron

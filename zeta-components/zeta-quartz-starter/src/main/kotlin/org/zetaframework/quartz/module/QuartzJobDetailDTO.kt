@@ -17,9 +17,9 @@ class QuartzJobDetailDTO {
     @ApiModelProperty(value = "触发器名称")
     var triggerName: String? = null
 
-    /** 触发器组名称 */
-    @ApiModelProperty(value = "触发器组名称")
-    var triggerGroupName: String? = null
+    /** 触发器组 */
+    @ApiModelProperty(value = "触发器组")
+    var triggerGroup: String? = null
 
     /** 触发器描述 */
     @ApiModelProperty(value = "触发器描述")
@@ -73,9 +73,9 @@ class QuartzJobDetailDTO {
     @ApiModelProperty(value = "任务名称")
     var jobName: String? = null
 
-    /** 任务组名称 */
-    @ApiModelProperty(value = "任务组名称")
-    var jobGroupName: String? = null
+    /** 任务组 */
+    @ApiModelProperty(value = "任务组")
+    var jobGroup: String? = null
 
     /** 任务描述 */
     @ApiModelProperty(value = "任务描述")

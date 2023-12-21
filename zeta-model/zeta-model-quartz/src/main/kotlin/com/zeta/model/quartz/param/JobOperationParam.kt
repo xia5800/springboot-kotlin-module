@@ -16,7 +16,7 @@ open class JobOperationParam {
     @get:NotBlank(message = "任务名称不能为空")
     var jobName: String? = null
 
-    @ApiModelProperty(value = "任务组名称", required = false)
-    var jobGroupName: String? = null
+    @ApiModelProperty(value = "任务组", required = false)
+    var jobGroup: String? = null
 
 }
