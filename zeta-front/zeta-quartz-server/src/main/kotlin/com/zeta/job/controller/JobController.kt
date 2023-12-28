@@ -14,6 +14,7 @@ import com.zeta.model.quartz.param.JobQueryParam
 import com.zeta.model.quartz.result.JobClassListResult
 import io.swagger.annotations.Api
 import io.swagger.annotations.ApiOperation
+import io.swagger.annotations.ApiParam
 import org.quartz.Job
 import org.quartz.Scheduler
 import org.quartz.Trigger
@@ -264,6 +265,24 @@ class JobController(
         val jobGroup = if (StrUtil.isBlank(runParam.jobGroup)) Scheduler.DEFAULT_GROUP else runParam.jobGroup
         quartzManager.runAJobNow(runParam.jobName!!, jobGroup!!, null)
         return success(true)
+    }
+
+    /**
+     * 获取下次触发时间
+     *
+     * @param cron 表达式
+     * @param count 触发次数 可不传。默认为6次
+     */
+    @ApiOperationSupport(order = 997)
+    @ApiOperation(value = "获取下次触发时间")
+    @GetMapping("/nextTriggerTime")
+    fun nextTriggerTime(
+        @ApiParam("cron") @RequestParam("cron")
+        cron: String,
+        @ApiParam("触发次数") @RequestParam(name = "count", defaultValue = "6", required = false)
+        count: Int,
+    ): ApiResult<List<String>> {
+        return success(quartzManager.nextTriggerTime(cron, count))
     }
 
 }

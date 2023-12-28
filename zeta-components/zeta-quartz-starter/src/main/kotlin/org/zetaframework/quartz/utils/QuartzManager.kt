@@ -1,5 +1,7 @@
 package org.zetaframework.quartz.utils
 
+import cn.hutool.core.date.DateUtil
+import cn.hutool.core.util.RandomUtil
 import org.quartz.*
 import org.quartz.impl.matchers.GroupMatcher
 import org.slf4j.Logger
@@ -12,6 +14,7 @@ import org.zetaframework.quartz.builder.CronTriggerBuilder
 import org.zetaframework.quartz.builder.JobDetailBuilder
 import org.zetaframework.quartz.builder.SimpleTriggerBuilder
 import org.zetaframework.quartz.module.QuartzJobDetailDTO
+import java.util.*
 
 
 /**
@@ -361,6 +364,38 @@ class QuartzManager(private val scheduler: Scheduler) {
 
             // 构造返回结果
             result.add(generatorModule(trigger, jobDetail))
+        }
+
+        return result
+    }
+
+    /**
+     * 获取cron下次触发时间
+     *
+     * @param cron 表达式
+     * @param count 触发次数
+     * @return List<String>
+     */
+    fun nextTriggerTime(cron: String, count: Int): MutableList<String> {
+        val result = mutableListOf<String>()
+        // 校验cron表达式
+        if (!CronExpression.isValidExpression(cron)) return result
+
+        // 构造cron触发器
+        val cronTrigger = CronTriggerBuilder(
+            name = RandomUtil.randomString(10),
+            cron = cron,
+            priority = 1,
+        ).build()
+
+        var currentTime = Date()
+        for (i in 0 until count) {
+            // 获取下次触发时间
+            val nextFireTime = cronTrigger.getFireTimeAfter(currentTime) ?: break
+            result.add(DateUtil.formatDateTime(nextFireTime))
+
+            // 更新当前时间为下次触发时间
+            currentTime = nextFireTime
         }
 
         return result
