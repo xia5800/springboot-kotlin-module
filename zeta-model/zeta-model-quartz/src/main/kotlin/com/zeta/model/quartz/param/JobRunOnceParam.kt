@@ -11,7 +11,8 @@ import io.swagger.annotations.ApiModelProperty
 @ApiModel(value = "运行一次参数")
 class JobRunOnceParam: JobOperationParam() {
 
-    @ApiModelProperty(value = "任务参数")
-    var dataMap: Map<String, Any>? = null
+    /** 任务参数 可为空 */
+    @ApiModelProperty(value = "任务参数", required = false)
+    var jobParam: String? = null
 
 }

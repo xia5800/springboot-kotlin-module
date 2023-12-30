@@ -13,17 +13,21 @@ import java.util.*
 @ApiModel(description = "任务详情")
 class QuartzJobDetailDTO {
 
-    /** 触发器名称 */
-    @ApiModelProperty(value = "触发器名称")
-    var triggerName: String? = null
+    /** 任务名称 */
+    @ApiModelProperty(value = "任务名称")
+    var jobName: String? = null
 
-    /** 触发器组 */
-    @ApiModelProperty(value = "触发器组")
-    var triggerGroup: String? = null
+    /** 任务描述 */
+    @ApiModelProperty(value = "任务描述")
+    var jobDescription: String? = null
 
-    /** 触发器描述 */
-    @ApiModelProperty(value = "触发器描述")
-    var triggerDescription: String? = null
+    /** 任务执行类 */
+    @ApiModelProperty(value = "任务执行类")
+    var jobClassName: String? = null
+
+    /** 任务参数 */
+    @ApiModelProperty(value = "任务参数")
+    var jobParam: String? = null
 
     /** 下次触发时间 */
     @ApiModelProperty(value = "下次触发时间")
@@ -65,31 +69,32 @@ class QuartzJobDetailDTO {
     var triggerState: String? = null
 
     /** 触发器类型 */
-    @ApiModelProperty(value = "触发器类型")
+    @ApiModelProperty(value = "触发器类型", allowableValues = "CRON,CAL_INT,SIMPLE,DAILY_I")
     var triggerType: String? = null
 
-
-    /** 任务名称 */
-    @ApiModelProperty(value = "任务名称")
-    var jobName: String? = null
-
-    /** 任务组 */
-    @ApiModelProperty(value = "任务组")
-    var jobGroup: String? = null
-
-    /** 任务描述 */
-    @ApiModelProperty(value = "任务描述")
-    var jobDescription: String? = null
-
-    /** 任务执行类 */
-    @ApiModelProperty(value = "任务执行类")
-    var jobClassName: String? = null
-
-    /** 任务参数 */
-    @ApiModelProperty(value = "任务参数")
-    var jobParam: String? = null
-
     /** cron表达式，仅当triggerType=CRON的时候才有值 */
-    @ApiModelProperty(value = "cron表达式，仅当triggerType=CRON的时候才有值")
+    @ApiModelProperty(value = "cron表达式，仅当triggerType=CAL_INT,DAILY_I的时候才有值")
     var cron: String? = null
+
+    /** 间隔的时间单位，仅当triggerType=CAL_INT,DAILY_I的时候才有值 */
+    @ApiModelProperty(value = "间隔的时间单位，仅当triggerType=CAL_INT,DAILY_I的时候才有值")
+    var strProp1: String? = null
+    /** 星期几，仅当triggerType=DAILY_I的时候才有值 */
+    @ApiModelProperty(value = "星期几，仅当triggerType=DAILY_I的时候才有值")
+    var strProp2: String? = null
+    /** 开始结束时间，仅当triggerType=DAILY_I的时候才有值 */
+    @ApiModelProperty(value = "开始结束时间，仅当triggerType=DAILY_I的时候才有值")
+    var strProp3: String? = null
+    /** 重复次数，仅当triggerType=CAL_INT,DAILY_I的时候才有值 */
+    @ApiModelProperty(value = "重复次数，仅当triggerType=CAL_INT,DAILY_I的时候才有值")
+    var intProp1: Int? = null
+
+
+    /** 重复次数，-1代表重复执行。仅当triggerType=SIMPLE的时候才有值 */
+    @ApiModelProperty(value = "重复次数，-1代表重复执行。仅当triggerType=SIMPLE的时候才有值")
+    var simpleRepeatCount: Int? = null
+    /** 重复间隔，单位毫秒。仅当triggerType=SIMPLE的时候才有值 */
+    @ApiModelProperty(value = "重复间隔，单位毫秒。仅当triggerType=SIMPLE的时候才有值")
+    var simpleRepeatInterval: Long? = null
+
 }

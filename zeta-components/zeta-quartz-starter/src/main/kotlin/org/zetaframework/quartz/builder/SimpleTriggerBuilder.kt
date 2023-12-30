@@ -25,7 +25,7 @@ import org.quartz.TriggerBuilder
  *     description = "测试触发器"
  * ).withIntervalInHours()
  *
- * // 自定义Trigger，15分支触发一次，一直重复
+ * // 自定义Trigger，15分钟触发一次，一直重复
  * val trigger: Trigger = SimpleTriggerBuilder(
  *     name = "testTrigger",
  *     timeInterval = 15L,

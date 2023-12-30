@@ -36,8 +36,14 @@ class QrtzTriggersServiceImpl(private val quartzManager: QuartzManager): IQrtzTr
         // 构造分页对象
         val page = param.buildPage<QuartzJobDetailDTO>()
 
+        // 处理分页查询条件
+        val pageParam = param.model ?: JobQueryParam()
+        pageParam.triggerStates = pageParam.triggerState?.split(",")?.map {
+            it.trim()
+        }
+
         // 分页查询
-        val triggerList = baseMapper.customPage(page, param.model ?: JobQueryParam())
+        val triggerList = baseMapper.customPage(page, pageParam)
 
         // 返回值处理
         if (triggerList.isNotEmpty()) {
@@ -49,7 +55,7 @@ class QrtzTriggersServiceImpl(private val quartzManager: QuartzManager): IQrtzTr
                 it.triggerState = QuartzUtil.jdbcTriggerTypeConvert(it.triggerState)
 
                 // 获取jobParam
-                val jobDetail = schedule.getJobDetail(JobKey(it.jobName, it.jobGroup))
+                val jobDetail = schedule.getJobDetail(JobKey(it.jobName))
                 it.jobParam = JSONUtil.toJsonStr(jobDetail.jobDataMap)
             }
         }

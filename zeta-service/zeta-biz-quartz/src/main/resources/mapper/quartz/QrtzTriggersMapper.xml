@@ -107,34 +107,39 @@
             t2.JOB_GROUP,
             t2.DESCRIPTION AS jobDescription,
             t2.JOB_CLASS_NAME,
-            t3.CRON_EXPRESSION AS cron
+            t3.CRON_EXPRESSION AS cron,
+            t4.STR_PROP_1 AS strProp1,
+            t4.STR_PROP_2 AS strProp2,
+            t4.STR_PROP_3 AS strProp3,
+            t4.INT_PROP_1 AS intProp1,
+            t5.REPEAT_COUNT AS simpleRepeatCount,
+            t5.REPEAT_INTERVAL AS simpleRepeatInterval
         FROM
             QRTZ_TRIGGERS t1
         LEFT JOIN QRTZ_JOB_DETAILS t2 ON t1.JOB_NAME = t2.JOB_NAME
             AND t1.JOB_GROUP = t2.JOB_GROUP
         LEFT JOIN QRTZ_CRON_TRIGGERS t3 ON t1.TRIGGER_NAME = t3.TRIGGER_NAME
             AND t1.TRIGGER_GROUP = t3.TRIGGER_GROUP
+        LEFT JOIN QRTZ_SIMPROP_TRIGGERS t4 ON t1.TRIGGER_NAME = t4.TRIGGER_NAME
+            AND t1.TRIGGER_GROUP = t4.TRIGGER_GROUP
+        LEFT JOIN QRTZ_SIMPLE_TRIGGERS t5 ON t1.TRIGGER_NAME = t5.TRIGGER_NAME
+            AND t1.TRIGGER_GROUP = t5.TRIGGER_GROUP
         <where>
-            <if test="param.triggerName != null and param.triggerName != ''">
-                AND t1.TRIGGER_NAME LIKE CONCAT('%', #{param.triggerName}, '%')
-            </if>
-            <if test="param.triggerGroup != null and param.triggerGroup != ''">
-                AND t1.TRIGGER_GROUP LIKE CONCAT('%', #{param.triggerGroup}, '%')
-            </if>
-            <if test="param.triggerDescription != null and param.triggerDescription != ''">
-                AND t1.DESCRIPTION LIKE CONCAT('%', #{param.triggerDescription}, '%')
-            </if>
             <if test="param.jobName != null and param.jobName != ''">
                 AND t2.JOB_NAME LIKE CONCAT('%', #{param.jobName}, '%')
-            </if>
-            <if test="param.jobGroup != null and param.jobGroup != ''">
-                AND t2.JOB_GROUP LIKE CONCAT('%', #{param.jobGroup}, '%')
             </if>
             <if test="param.jobDescription != null and param.jobDescription != ''">
                 AND t2.DESCRIPTION LIKE CONCAT('%', #{param.jobDescription}, '%')
             </if>
-            <if test="param.triggerState != null and param.triggerState != ''">
-                AND t1.TRIGGER_STATE = #{param.triggerState}
+            <if test="param.triggerStates != null">
+                AND t1.TRIGGER_STATE IN (
+                    <foreach collection="param.triggerStates" item="state" separator=",">
+                        #{state}
+                    </foreach>
+                )
+            </if>
+            <if test="param.triggerType != null and param.triggerType != ''">
+                AND t1.TRIGGER_TYPE = #{param.triggerType}
             </if>
             <if test="param.jobClassName != null and param.jobClassName != ''">
                 AND t2.JOB_CLASS_NAME = #{param.jobClassName}

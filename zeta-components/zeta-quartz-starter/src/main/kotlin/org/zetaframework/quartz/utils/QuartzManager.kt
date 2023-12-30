@@ -49,36 +49,6 @@ class QuartzManager(private val scheduler: Scheduler) {
     fun getScheduler(): Scheduler = scheduler
 
     /**
-     * 创建一个CronJob
-     *
-     * 说明：
-     * 一个job对应一个trigger
-     * @param jobDetail: JobDetailBuilder
-     * @param cronTrigger: CronTriggerBuilder
-     */
-    @Transactional(rollbackFor = [Exception::class])
-    fun createCronJob(jobDetail: JobDetailBuilder, cronTrigger: CronTriggerBuilder) {
-        createJob(jobDetail.build(), cronTrigger.build())
-    }
-
-    /**
-     * 创建一个只执行一次的job
-     *
-     * 说明：
-     * 创建1s之后开始执行，只执行一次
-     * @param jobDetail: JobDetailBuilder
-     */
-    @Transactional(rollbackFor = [Exception::class])
-    fun createOnceJob(jobDetail: JobDetailBuilder, timeInterval: Long? = 1L) {
-        val trigger = SimpleTriggerBuilder(
-            jobDetail.name,
-            timeInterval = timeInterval ?: 1L,
-            description = jobDetail.description
-        ).withIntervalInSeconds()
-        createJob(jobDetail.build(), trigger)
-    }
-
-    /**
      * 创建一个job
      *
      * 说明：
@@ -95,83 +65,6 @@ class QuartzManager(private val scheduler: Scheduler) {
             throw BusinessException("操作失败")
         }
     }
-
-    /**
-     * 修改一个job
-     *
-     * @param triggerName       原触发器名称
-     * @param jobDetail         新任务
-     * @param triggerGroup      原触发器组
-     */
-    @Transactional(rollbackFor = [Exception::class])
-    fun updateJob(triggerName: String, jobDetail: JobDetailBuilder, triggerGroup: String = Scheduler.DEFAULT_GROUP) {
-        updateJob(triggerName, jobDetail.build(), triggerGroup)
-    }
-
-    /**
-     * 修改一个job
-     *
-     * @param triggerName       原触发器名称
-     * @param jobDetail         新任务
-     * @param triggerGroup      原触发器组
-     */
-    @Transactional(rollbackFor = [Exception::class])
-    fun updateJob(triggerName: String, jobDetail: JobDetail, triggerGroup: String = Scheduler.DEFAULT_GROUP) {
-        try {
-            // 获取触发器
-            val trigger = scheduler.getTrigger(TriggerKey(triggerName, triggerGroup))
-
-            // 删除旧的job
-            deleteJob(trigger.jobKey)
-
-            // 添加一个新的job
-            createJob(jobDetail, trigger)
-        } catch (e: Exception) {
-            logger.error("修改一个job：操作失败", e)
-            throw BusinessException("操作失败")
-        }
-    }
-
-    /**
-     * 修改为Cron触发器
-     *
-     * @param triggerName       原触发器名称
-     * @param trigger           新触发器
-     * @param triggerGroup      原触发器组
-     */
-    @Transactional(rollbackFor = [Exception::class])
-    fun updateCronTrigger(triggerName: String, trigger: CronTriggerBuilder, triggerGroup: String = Scheduler.DEFAULT_GROUP) {
-        updateTrigger(triggerName, trigger.build(), triggerGroup)
-    }
-
-    /**
-     * 修改触发器
-     *
-     * @param triggerName       原触发器名称
-     * @param trigger           新触发器
-     * @param triggerGroup      原触发器组
-     */
-    @Transactional(rollbackFor = [Exception::class])
-    fun updateTrigger(triggerName: String, trigger: Trigger, triggerGroup: String = Scheduler.DEFAULT_GROUP) {
-        updateTrigger(TriggerKey(triggerName, triggerGroup), trigger)
-    }
-
-    /**
-     * 修改触发器
-     *
-     * @param triggerKey 触发器key
-     * @param trigger    新触发器
-     */
-    @Transactional(rollbackFor = [Exception::class])
-    fun updateTrigger(triggerKey: TriggerKey, trigger: Trigger) {
-        try {
-            scheduler.rescheduleJob(triggerKey, trigger)
-        } catch (e: Exception) {
-            logger.error("修改触发器：操作失败", e)
-            throw BusinessException("操作失败")
-        }
-    }
-
 
     /**
      * 获取触发器状态
@@ -336,40 +229,6 @@ class QuartzManager(private val scheduler: Scheduler) {
     }
 
     /**
-     * 获取所有计划中的任务列表
-     *
-     * 说明：
-     * 1.适用于前端不分页。或者前端分页、前端排序。
-     * 2.如果需要后端分页查询，建议自行编写SQL实现
-     *
-     * @return List<QuartzJobDTO>
-     */
-    fun queryAllJob(): MutableList<QuartzJobDetailDTO> {
-        val result = mutableListOf<QuartzJobDetailDTO>()
-
-        // 获取所有的触发器key
-        val triggerKeys = scheduler.getTriggerKeys(GroupMatcher.anyTriggerGroup())
-        for (triggerKey in triggerKeys) {
-            // 根据触发器key查询触发器详情 ps: 查的是QRTZ_TRIGGER表
-            val trigger = scheduler.getTrigger(triggerKey) ?: continue
-            // 根据任务key查询任务详情 ps: 查的是QRTZ_JOB_DETAILS表
-            val jobKey = trigger.jobKey ?: continue
-            var jobDetail: JobDetail
-            try {
-                jobDetail = scheduler.getJobDetail(jobKey)
-            }catch (e: Exception) {
-                logger.warn("获取任务详情失败", e)
-                continue
-            }
-
-            // 构造返回结果
-            result.add(generatorModule(trigger, jobDetail))
-        }
-
-        return result
-    }
-
-    /**
      * 获取cron下次触发时间
      *
      * @param cron 表达式
@@ -401,48 +260,4 @@ class QuartzManager(private val scheduler: Scheduler) {
         return result
     }
 
-}
-
-/**
- * 扩展方法：构造Quartz任务详情
- *
- * @param trigger   触发器
- * @param jobDetail 任务
- */
-private fun QuartzManager.generatorModule(trigger: Trigger, jobDetail: JobDetail): QuartzJobDetailDTO {
-    val triggerKey = trigger.key
-    val jobKey = trigger.jobKey
-
-    return QuartzJobDetailDTO().apply {
-        // trigger表的数据
-        triggerName = triggerKey.name
-        triggerGroup = triggerKey.group
-        triggerDescription = trigger.description
-        nextFireTime = trigger.nextFireTime
-        prevFireTime = trigger.previousFireTime
-        priority = trigger.priority
-        startTime = trigger.startTime
-        endTime = trigger.endTime
-        triggerState = getTriggerState(triggerKey)
-        triggerType = getTriggerType(trigger)
-
-
-        // job_details表的数据
-        jobName = jobKey.name
-        jobGroup = jobKey.group
-        jobDescription = jobDetail.description
-        try {
-            jobClassName = jobDetail.jobClass?.name
-        }catch (e: Exception) {
-            e.printStackTrace()
-        }
-        jobParam = JSONUtil.toJsonStr(jobDetail.jobDataMap)
-        if (triggerType === "CRON") {
-            try {
-                // 如果触发器是cron类型的触发器，则获取cron表达式的值
-                val cronTrigger = trigger as CronTrigger
-                cron = cronTrigger.cronExpression
-            } catch (e: Exception) { }
-        }
-    }
 }

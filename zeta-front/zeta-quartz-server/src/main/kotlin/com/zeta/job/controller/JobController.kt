@@ -1,23 +1,23 @@
 package com.zeta.job.controller
 
 import cn.hutool.core.util.EnumUtil
-import cn.hutool.core.util.StrUtil
 import com.fasterxml.jackson.core.type.TypeReference
 import com.github.xiaoymin.knife4j.annotations.ApiOperationSupport
 import com.github.xiaoymin.knife4j.annotations.ApiSupport
 import com.zeta.biz.quartz.service.IQrtzTriggersService
-import com.zeta.model.quartz.dto.JobSaveDTO
-import com.zeta.model.quartz.dto.JobTriggerUpdateDTO
+import com.zeta.model.quartz.dto.JobSaveOrUpdateDTO
 import com.zeta.model.quartz.entity.QrtzTriggers
+import com.zeta.model.quartz.enums.DailyTimeScheduleTypeEnum
+import com.zeta.model.quartz.enums.ScheduleTypeEnum
+import com.zeta.model.quartz.enums.SimpleScheduleUnitEnum
 import com.zeta.model.quartz.param.JobOperationParam
 import com.zeta.model.quartz.param.JobQueryParam
+import com.zeta.model.quartz.param.JobRunOnceParam
 import com.zeta.model.quartz.result.JobClassListResult
 import io.swagger.annotations.Api
 import io.swagger.annotations.ApiOperation
 import io.swagger.annotations.ApiParam
-import org.quartz.Job
-import org.quartz.Scheduler
-import org.quartz.Trigger
+import org.quartz.*
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.validation.annotation.Validated
@@ -33,8 +33,7 @@ import org.zetaframework.base.result.PageResult
 import org.zetaframework.controller.SuperBaseController
 import org.zetaframework.core.enums.QuartzJobEnum
 import org.zetaframework.core.utils.JSONUtil
-import org.zetaframework.quartz.builder.CronTriggerBuilder
-import org.zetaframework.quartz.builder.JobDetailBuilder
+import org.zetaframework.quartz.builder.*
 import org.zetaframework.quartz.module.QuartzJobDetailDTO
 import org.zetaframework.quartz.utils.QuartzManager
 
@@ -81,21 +80,6 @@ class JobController(
     }
 
     /**
-     * 获取所有定时任务
-     *
-     * @return ApiResult<List<QuartzJobDetailDTO>>
-     */
-    @PreCheckPermission(value = ["{}:view"])
-    @ApiOperationSupport(order = 20)
-    @SysLog
-    @ApiOperation(value = "列表查询")
-    @GetMapping
-    fun list(): ApiResult<List<QuartzJobDetailDTO>> {
-        return success(quartzManager.queryAllJob())
-    }
-
-
-    /**
      * 任务执行类列表
      *
      * @return ApiResult<MutableList<Any>>
@@ -122,54 +106,49 @@ class JobController(
     /**
      * 新增
      *
-     * @param saveDTO SaveDTO 保存对象
+     * @param param SaveDTO 保存对象
      * @return ApiResult<Boolean>
      */
-    @NoXss // 加这个注解主要是因为，saveDTO.jobParam的值是一个json字符串，会被xss过滤掉，导致json字符串转换成map失败
+    @NoXss // 加这个注解主要是因为，param.jobParam的值是一个json字符串，会被xss过滤掉，导致json字符串转换成map失败
     @PreCheckPermission(value = ["{}:add", "{}:save"], mode = PreMode.OR)
     @ApiOperationSupport(order = 40)
-    @SysLog
     @ApiOperation(value = "新增", notes = "新增并立即执行")
+    @SysLog
     @PostMapping
-    fun save(@RequestBody @Validated saveDTO: JobSaveDTO): ApiResult<Boolean> {
+    fun save(@RequestBody @Validated param: JobSaveOrUpdateDTO): ApiResult<Boolean> {
         val jobClazz: Class<Job>
         try {
-            jobClazz = Class.forName(saveDTO.jobClassName) as Class<Job>
+            jobClazz = Class.forName(param.jobClassName) as Class<Job>
         }catch (e: Exception) {
             return fail("任务执行类错误", false)
         }
 
         // 设置默认值
-        val jobGroup = if (StrUtil.isBlank(saveDTO.jobGroup)) Scheduler.DEFAULT_GROUP else saveDTO.jobGroup
-        val triggerGroup = if (StrUtil.isBlank(saveDTO.triggerGroup)) Scheduler.DEFAULT_GROUP else saveDTO.triggerGroup
-        val priority = if (saveDTO.priority == null) Trigger.DEFAULT_PRIORITY else saveDTO.priority
+        val priority: Int = if (param.priority == null) Trigger.DEFAULT_PRIORITY else param.priority!!
 
         // 处理任务参数 string -> Map<string, object>  ps: 转换失败返回null
-        val jobParam : MutableMap<String, Any?>? = JSONUtil.parseObject(saveDTO.jobParam, object: TypeReference<MutableMap<String, Any?>>(){})
+        val jobParam : MutableMap<String, Any?>? = JSONUtil.parseObject(param.jobParam, object: TypeReference<MutableMap<String, Any?>>(){})
 
         // 构造任务
         val jobDetail = JobDetailBuilder(
-            name = saveDTO.jobName!!,
+            name = param.jobName!!,
             jobClazz = jobClazz,
-            groupName = jobGroup!!,
-            description = saveDTO.jobDescription,
+            description = param.jobDescription,
             param = jobParam
-        )
+        ).build()
 
-        // 构造cron触发器
-        val cronTrigger = CronTriggerBuilder(
-            name = saveDTO.triggerName!!,
-            cron = saveDTO.cron!!,
-            priority = priority!!,
-            groupName = triggerGroup!!,
-            description = saveDTO.triggerDescription
-        )
+        // 构造触发器
+        val cronTrigger = when(param.scheduleType!!) {
+            ScheduleTypeEnum.CRON -> buildCronTrigger(param, priority)
+            ScheduleTypeEnum.CAL_INT -> buildCalendarTrigger(param, priority)
+            ScheduleTypeEnum.DAILY_I -> buildDailyTimeTrigger(param, priority)
+            ScheduleTypeEnum.SIMPLE -> buildSimpleTrigger(param, priority)
+        }
 
         // 创建一个CronJob
-        quartzManager.createCronJob(jobDetail, cronTrigger)
+        quartzManager.createJob(jobDetail, cronTrigger)
         return success(true)
     }
-
 
     /**
      * 修改
@@ -177,29 +156,18 @@ class JobController(
      * @param updateDTO UpdateDTO 修改对象
      * @return ApiResult<Boolean>
      */
+    @NoXss // 加这个注解主要是因为，param.jobParam的值是一个json字符串，会被xss过滤掉，导致json字符串转换成map失败
     @PreCheckPermission(value = ["{}:edit", "{}:update"], mode = PreMode.OR)
     @ApiOperationSupport(order = 50)
     @ApiOperation(value = "修改")
     @SysLog
     @PutMapping
-    fun update(@RequestBody @Validated updateDTO: JobTriggerUpdateDTO): ApiResult<Boolean> {
-        // 设置默认值
-        val oldGroup = if (StrUtil.isBlank(updateDTO.oldGroup)) Scheduler.DEFAULT_GROUP else updateDTO.oldGroup
-        val triggerGroup = if (StrUtil.isBlank(updateDTO.triggerGroup)) Scheduler.DEFAULT_GROUP else updateDTO.triggerGroup
-        val priority = if (updateDTO.priority == null) Trigger.DEFAULT_PRIORITY else updateDTO.priority
+    fun update(@RequestBody @Validated param: JobSaveOrUpdateDTO): ApiResult<Boolean> {
+        // 删除任务
+        delete(JobOperationParam().apply { jobName = param.jobName })
 
-        // 构建新的触发器
-        val cronTrigger = CronTriggerBuilder(
-            name = updateDTO.triggerName!!,
-            cron = updateDTO.cron!!,
-            priority = priority!!,
-            groupName = triggerGroup!!,
-            description = updateDTO.triggerDescription
-        )
-
-        // 修改触发器
-        quartzManager.updateCronTrigger(updateDTO.oldName!!, cronTrigger, oldGroup!!)
-        return success(true)
+        // 创建任务
+        return save(param)
     }
 
     /**
@@ -214,8 +182,7 @@ class JobController(
     @SysLog
     @DeleteMapping
     fun delete(@RequestBody @Validated deleteParam: JobOperationParam): ApiResult<Boolean> {
-        val jobGroup = if (StrUtil.isBlank(deleteParam.jobGroup)) Scheduler.DEFAULT_GROUP else deleteParam.jobGroup
-        quartzManager.deleteJob(deleteParam.jobName!!, jobGroup!!)
+        quartzManager.deleteJob(deleteParam.jobName!!)
         return success(true)
     }
 
@@ -230,8 +197,7 @@ class JobController(
     @SysLog
     @PostMapping("/pause")
     fun pause(@RequestBody @Validated pauseParam: JobOperationParam): ApiResult<Boolean> {
-        val jobGroup = if (StrUtil.isBlank(pauseParam.jobGroup)) Scheduler.DEFAULT_GROUP else pauseParam.jobGroup
-        quartzManager.pauseJob(pauseParam.jobName!!, jobGroup!!)
+        quartzManager.pauseJob(pauseParam.jobName!!)
         return success(true)
     }
 
@@ -246,8 +212,7 @@ class JobController(
     @SysLog
     @PostMapping("/resume")
     fun resume(@RequestBody @Validated resumeParam: JobOperationParam): ApiResult<Boolean> {
-        val jobGroup = if (StrUtil.isBlank(resumeParam.jobGroup)) Scheduler.DEFAULT_GROUP else resumeParam.jobGroup
-        quartzManager.resumeJob(resumeParam.jobName!!, jobGroup!!)
+        quartzManager.resumeJob(resumeParam.jobName!!)
         return success(true)
     }
 
@@ -261,9 +226,10 @@ class JobController(
     @ApiOperation(value = "立即运行一次", notes = "只会运行一次，方便测试时用")
     @SysLog
     @PostMapping("/runOnce")
-    fun runANow(@RequestBody @Validated runParam: JobOperationParam): ApiResult<Boolean> {
-        val jobGroup = if (StrUtil.isBlank(runParam.jobGroup)) Scheduler.DEFAULT_GROUP else runParam.jobGroup
-        quartzManager.runAJobNow(runParam.jobName!!, jobGroup!!, null)
+    fun runOnce(@RequestBody @Validated runParam: JobRunOnceParam): ApiResult<Boolean> {
+        // 处理任务参数 string -> Map<string, object>  ps: 转换失败返回null
+        val jobParam : MutableMap<String, Any?>? = JSONUtil.parseObject(runParam.jobParam, object: TypeReference<MutableMap<String, Any?>>(){})
+        quartzManager.runAJobNow(runParam.jobName!!, jobDataMap = JobDataMap(jobParam))
         return success(true)
     }
 
@@ -283,6 +249,123 @@ class JobController(
         count: Int,
     ): ApiResult<List<String>> {
         return success(quartzManager.nextTriggerTime(cron, count))
+    }
+
+    /**
+     * 构造Cron类型触发器
+     *
+     * @param param 保存对象
+     * @param priority 优先级
+     * @return Trigger
+     */
+    private fun buildCronTrigger(param: JobSaveOrUpdateDTO, priority: Int): Trigger {
+        val cron = param.cron ?: throw IllegalArgumentException("cron表达式不能为空")
+        return CronTriggerBuilder(
+            name = param.jobName!!,
+            cron = cron,
+            priority = priority,
+            description = param.jobDescription
+        ).build()
+    }
+    /**
+     * 构造Calendar类型触发器
+     *
+     * @param param 保存对象
+     * @param priority 优先级
+     * @return Trigger
+     */
+    private fun buildCalendarTrigger(param: JobSaveOrUpdateDTO, priority: Int): Trigger {
+        val calendar = param.calendar ?: throw IllegalArgumentException("Calendar类型调度器参数不能为空")
+        val timeInterval = calendar.timeInterval ?: throw IllegalArgumentException("间隔时间不能为空")
+        val uint = calendar.unit ?: throw IllegalArgumentException("间隔单位不能为空")
+
+        return CalendarIntervalTriggerBuilder(
+            name = param.jobName!!,
+            timeInterval = timeInterval,
+            unit = uint,
+            priority = priority,
+            description = param.jobDescription
+        ).build()
+    }
+    /**
+     * 构造DailyTime类型触发器
+     *
+     * @param param 保存对象
+     * @param priority 优先级
+     * @return Trigger
+     */
+    private fun buildDailyTimeTrigger(param: JobSaveOrUpdateDTO, priority: Int): Trigger {
+        val dailyTime = param.dailyTime ?: throw IllegalArgumentException("DailyTime类型调度器参数不能为空")
+        val dailyType = dailyTime.type ?: throw IllegalArgumentException("执行类型不能为空")
+
+        val dailyTimeTrigger = DailyTimeIntervalTriggerBuilder(param.jobName!!).apply {
+            this.priority = priority
+            this.description = param.jobDescription
+            this.timeInterval = dailyTime.timeInterval
+            this.unit = dailyTime.unit
+            dailyTime.startTime?.let { startTime ->
+                this.startingDailyAt = TimeOfDay(
+                    startTime.hour,
+                    startTime.minute,
+                    startTime.second
+                )
+            }
+            dailyTime.endTime?.let { endTime ->
+                this.endingDailyAt = TimeOfDay(
+                    endTime.hour,
+                    endTime.minute,
+                    endTime.second
+                )
+            }
+        }
+        return when(dailyType) {
+            DailyTimeScheduleTypeEnum.EveryDay -> {
+                dailyTimeTrigger.onEveryDay()
+            }
+            DailyTimeScheduleTypeEnum.SaturdayAndSunday -> {
+                dailyTimeTrigger.onSaturdayAndSunday()
+            }
+            DailyTimeScheduleTypeEnum.MondayThroughFriday -> {
+                dailyTimeTrigger.onMondayThroughFriday()
+            }
+            DailyTimeScheduleTypeEnum.DaysOfTheWeek -> {
+                val daysOfWeek = dailyTime.daysOfWeek ?: throw IllegalArgumentException("daysOfWeek不能为空")
+                dailyTimeTrigger.onDaysOfTheWeek(daysOfWeek)
+            }
+        }
+    }
+    /**
+     * 构造Simple类型触发器
+     *
+     * @param param 保存对象
+     * @param priority 优先级
+     * @return Trigger
+     */
+    private fun buildSimpleTrigger(param: JobSaveOrUpdateDTO, priority: Int): Trigger {
+        val simple = param.simple ?: throw IllegalArgumentException("Simple类型调度器参数不能为空")
+        val timeInterval = simple.timeInterval?: throw IllegalArgumentException("间隔时间不能为空")
+        val unit = simple.unit ?: throw IllegalArgumentException("间隔单位不能为空")
+
+        val simpleTrigger = SimpleTriggerBuilder(param.jobName!!, timeInterval).apply {
+            this.priority = priority
+            this.description = param.jobDescription
+            this.repeatCount = simple.repeatCount
+            this.repeatForever = simple.repeatForever
+        }
+        return when(unit) {
+            SimpleScheduleUnitEnum.HOURS -> {
+                simpleTrigger.withIntervalInHours()
+            }
+            SimpleScheduleUnitEnum.MINUTES -> {
+                simpleTrigger.withIntervalInMinutes()
+            }
+            SimpleScheduleUnitEnum.SECONDS -> {
+                simpleTrigger.withIntervalInSeconds()
+            }
+            SimpleScheduleUnitEnum.MILLISECONDS -> {
+                simpleTrigger.withIntervalInMilliseconds()
+            }
+        }
     }
 
 }
